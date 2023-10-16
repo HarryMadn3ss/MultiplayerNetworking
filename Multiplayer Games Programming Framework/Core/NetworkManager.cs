@@ -27,30 +27,69 @@ namespace Multiplayer_Games_Programming_Framework.Core
 			}
 		}
 
+		TcpClient m_TcpClient;
+		NetworkStream m_Stream;
+		StreamReader m_StreamReader;
+		StreamWriter m_StreamWriter;
 
 		NetworkManager()
 		{
+			m_TcpClient = new TcpClient();
 		}
 
 		public bool Connect(string ip, int port)
 		{
+			try
+			{
+				m_TcpClient.Connect(ip, port);
+				m_Stream = m_TcpClient.GetStream();
+				m_StreamReader = new StreamReader(m_Stream, Encoding.UTF8);
+				m_StreamWriter = new StreamWriter(m_Stream, Encoding.UTF8);
+				Run();
+				return true;
+			}
+			catch(Exception ex)
+			{
+				Debug.WriteLine(ex.Message);//debug writes to vs
+			}
+
 			return false;
 		}
 
 		public void Run()
 		{
+			//listen to the serverTcpClient
+			Thread TcpThread = new Thread(new ThreadStart(TcpProcessServerResponse));
+			TcpThread.Name = "TCP Thread";
+			TcpThread.Start();
 		}
 
 		private void TcpProcessServerResponse()
 		{
+			//listen to incoming msg from the sever
+			try
+			{
+				while(m_TcpClient.Connected)// while we are connected to the server
+				{
+					string message = m_StreamReader.ReadLine();
+					Debug.WriteLine(message);
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine(ex.Message);
+			}
 		}
 
 		public void TCPSendMessage(string message)
 		{
+			m_StreamWriter.WriteLine(message);
+			m_StreamWriter.Flush();
 		}
 
 		public void Login()
 		{
+			TCPSendMessage("Hello Server my name is Craig");
 		}
 	}
 }
