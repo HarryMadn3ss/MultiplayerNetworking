@@ -7,8 +7,8 @@ namespace Multiplayer_Games_Programming_Framework
 	internal static class Constants
 	{
 		public static Vector2 m_Gravity = new Vector2(0, 9.81f);
-		public static readonly int m_ScreenWidth = 1500;
-		public static readonly int m_ScreenHeight = 1000;
+		public static readonly int m_ScreenWidth = 750;
+		public static readonly int m_ScreenHeight = 500;
 
 		public static float m_PhysicsWidth = ScreenToPhysics(m_ScreenWidth);
 		public static float m_PhysicsHeight = ScreenToPhysics(m_ScreenHeight);

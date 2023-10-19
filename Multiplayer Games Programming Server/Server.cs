@@ -17,6 +17,7 @@ namespace Multiplayer_Games_Programming_Server
 		{
 			IPAddress ip = IPAddress.Parse(ipAddress);
 			m_TcpListener = new TcpListener(ip, port);
+			m_Clients = new ConcurrentDictionary<int, ConnectedClient>();
 		}
 
 		public void Start()
@@ -25,11 +26,25 @@ namespace Multiplayer_Games_Programming_Server
 			{
 				m_TcpListener.Start();
 				Console.WriteLine("Server Started.....");
+				int index = 0;
 
-				Socket socket = m_TcpListener.AcceptSocket(); //blocking call so if no connections we will wait
-				Console.WriteLine("Connection Has Been Made");
+				while(true)
+				{
+                    Socket socket = m_TcpListener.AcceptSocket(); //blocking call so if no connections we will wait
+					int tempIndex = index;
+                    Console.WriteLine("Connection Has Been Made");
+                    //Console.WriteLine(Thread.CurrentThread.Name);
+					ConnectedClient conClient = new ConnectedClient(socket);
+					index++;
+                    Thread thread = new Thread(() => { ClientMethod(index); });
+					thread.Name = "Player Index: " + index.ToString();
+                    m_Clients.GetOrAdd(tempIndex, conClient);
+					thread.Start();
+				}
 
-				ClientMethod(socket);
+				//threads
+
+				//ClientMethod(socket);
 			}			
 			catch(Exception ex) //if not catch the error
 			{
@@ -39,38 +54,32 @@ namespace Multiplayer_Games_Programming_Server
 
 		public void Stop()
 		{
-			m_TcpListener?.Stop(); //? if statment if exists stop
+			m_TcpListener?.Stop(); //'? if statment' if exists stop
 		}
 
-		private void ClientMethod(Socket index)
+		private void ClientMethod(int index)
 		{
-			//client infomation
+			//wehn connected add to conncurency dictionary            
+
+
+			//m_Clients.AddOrUpdate(index, new ConnectedClient(socket));
 			try
 			{
-				string message;
-
-				NetworkStream stream = new NetworkStream(index, false);
-
-				StreamReader reader = new StreamReader(stream, Encoding.UTF8);
-
-				StreamWriter writer = new StreamWriter(stream, Encoding.UTF8);
-
-				while ((message = reader.ReadLine()) != null) //aslong as there is a msg then read //blocking that it must recieve from the client first
+				string? message;
+				while((message = m_Clients[index].Read()) != null)
 				{
-					Console.WriteLine("Recived Message: " + message);
+					m_Clients[index].Send(message);
 
-					writer.WriteLine("Logged In!");
-					writer.Flush();
 				}
 			}
-			catch (Exception ex)
+			catch(Exception ex)
 			{
-				Console.WriteLine(ex.Message);
-;			}
-			finally
-			{
-				index.Close();
+			
 			}
+			
+			
+
+			
 
 		}
 	}
