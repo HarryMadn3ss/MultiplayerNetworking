@@ -34,7 +34,7 @@ namespace Multiplayer_Games_Programming_Server
 					int tempIndex = index;
                     Console.WriteLine("Connection Has Been Made");
                     //Console.WriteLine(Thread.CurrentThread.Name);
-					ConnectedClient conClient = new ConnectedClient(socket);
+					ConnectedClient conClient = new ConnectedClient(tempIndex, socket);
 					index++;
                     Thread thread = new Thread(() => { ClientMethod(index); });
 					thread.Name = "Player Index: " + index.ToString();
@@ -68,7 +68,7 @@ namespace Multiplayer_Games_Programming_Server
 				string? message;
 				while((message = m_Clients[index].Read()) != null)
 				{
-					m_Clients[index].Send(message);
+					m_Clients[index].Send(new Message(message));
 
 				}
 			}

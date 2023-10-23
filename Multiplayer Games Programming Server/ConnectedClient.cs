@@ -27,16 +27,22 @@ namespace Multiplayer_Games_Programming_Server
 			m_Socket.Close();
 		}
 
-        public string? Read()
-        {            
+        public string? Read(/*Packet msgPacket*/)
+        {
+            //Message? msg = Message.Deserialize(msgPacket);   
+            
             return m_StreamReader.ReadLine();
         }
 
-        public void Send(string message)
+        public void Send(Packet msgPacket)
         {
+
+            string message = msgPacket.Serialize();
+
             Console.WriteLine("Recived Message: " + message);
 
-            m_StreamWriter.WriteLine("Logged In!");
+            m_StreamWriter.WriteLine();            
+
             m_StreamWriter.Flush();
         }
     }
