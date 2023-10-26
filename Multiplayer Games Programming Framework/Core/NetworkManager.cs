@@ -83,13 +83,24 @@ namespace Multiplayer_Games_Programming_Framework.Core
 
 		public void TCPSendMessage(string message)
 		{
-			m_StreamWriter.WriteLine(message);
+
+			//Message msg = new Message();
+			//string msgToRead = msg.Deserialize(message);
+			Message? msg = Message.Deserialize(message);
+
+			//Packet.PrintToConsole(msg);
+
+
+			m_StreamWriter.WriteLine(msg.m_message);					
 			m_StreamWriter.Flush();
 		}
 
 		public void Login()
 		{
-			TCPSendMessage("Hello Server my name is Craig");
+			Message message = new Message("Hello Sever, My name is Bob");
+			string msgToSend = message.Serialize();
+
+			TCPSendMessage(msgToSend);
 		}
 	}
 }

@@ -27,11 +27,11 @@ namespace Multiplayer_Games_Programming_Server
 			m_Socket.Close();
 		}
 
-        public string? Read(/*Packet msgPacket*/)
+        public string? Read()
         {
-            //Message? msg = Message.Deserialize(msgPacket);   
-            
-            return m_StreamReader.ReadLine();
+            //Message? msg = Message.Deserialize(message);   
+
+            return m_StreamReader.ReadLine();            
         }
 
         public void Send(Packet msgPacket)
