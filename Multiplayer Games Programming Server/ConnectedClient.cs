@@ -27,21 +27,34 @@ namespace Multiplayer_Games_Programming_Server
 			m_Socket.Close();
 		}
 
-        public string? Read()
+        public Packet? Read()
         {
             //Message? msg = Message.Deserialize(message);   
+            string? msg = m_StreamReader.ReadLine();
 
-            return m_StreamReader.ReadLine();            
+            if (msg != null)
+            {
+                Packet? packet = Packet.Deserialize(msg);                
+                return packet;
+            }
+
+            return null;    
+
+            
         }
 
         public void Send(Packet msgPacket)
         {
 
-            string message = msgPacket.Serialize();
+            //string message = msgPacket.Serialize();
 
-            Console.WriteLine("Recived Message: " + message);
+            //Console.WriteLine("Recived Message: " + message);
 
-            m_StreamWriter.WriteLine();            
+            //msgPacket = new MessagePacket();
+
+            
+
+            m_StreamWriter.WriteLine(msgPacket);            
 
             m_StreamWriter.Flush();
         }

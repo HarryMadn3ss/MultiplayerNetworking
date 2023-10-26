@@ -46,37 +46,37 @@ namespace Multiplayer_Games_Programming_Packet_Library
 	}
 
 	[Serializable]
-	public class Message : Packet
+	public class MessagePacket : Packet
 	{
 		[JsonPropertyName("Message")]
 		public string? m_message;
 
-		public Message() 
+		public MessagePacket() 
 		{ 
 			Type = PacketType.MESSAGEPACKET;
 		}
 
-		public Message(string message)
+		public MessagePacket(string message)
 		{
 			Type = PacketType.MESSAGEPACKET;
 			m_message = message;
 		}
 
-        public static Message? Deserialize(string json)
-        {
-            var options = new JsonSerializerOptions
-            {
-                Converters = { new PacketConverter() },
-                IncludeFields = true,
-            };
+        //public static MessagePacket? Deserialize(string json)
+        //{
+        //    var options = new JsonSerializerOptions
+        //    {
+        //        Converters = { new PacketConverter() },
+        //        IncludeFields = true,
+        //    };
 
-            return JsonSerializer.Deserialize<Message>(json, options);
-        }
+        //    return JsonSerializer.Deserialize<MessagePacket>(json, options);
+        //}
 
     }
 
 	[Serializable]
-	public class Position : Packet
+	public class PositionPacket : Packet
 	{
 
 		[JsonPropertyName("PositionX")]
@@ -85,12 +85,12 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		[JsonPropertyName("PositionY")]
 		public float Y { get; set; }
 
-		public Position()
+		public PositionPacket()
 		{
 			Type = PacketType.POSITIONPACKET;
 		}
 
-		public Position(float x, float y)
+		public PositionPacket(float x, float y)
 		{
 			Type = PacketType.POSITIONPACKET;	
 			X = x;
@@ -112,7 +112,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
 				{
 					if(typeProperty.GetByte() == (byte)PacketType.MESSAGEPACKET)
 					{
-						return JsonSerializer.Deserialize<Message>(root.GetRawText(), options);
+						return JsonSerializer.Deserialize<MessagePacket>(root.GetRawText(), options);
 					}
 				}
 			}

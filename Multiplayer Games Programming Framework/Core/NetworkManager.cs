@@ -71,6 +71,8 @@ namespace Multiplayer_Games_Programming_Framework.Core
 			{
 				while(m_TcpClient.Connected)// while we are connected to the server
 				{
+
+
 					string message = m_StreamReader.ReadLine();
 					Debug.WriteLine(message);
 				}
@@ -81,26 +83,27 @@ namespace Multiplayer_Games_Programming_Framework.Core
 			}
 		}
 
-		public void TCPSendMessage(string message)
+		public void TCPSendMessage(Packet? message)
 		{
 
 			//Message msg = new Message();
 			//string msgToRead = msg.Deserialize(message);
-			Message? msg = Message.Deserialize(message);
+			//Message? msg = Message.Deserialize(message);
 
 			//Packet.PrintToConsole(msg);
 
+			
 
-			m_StreamWriter.WriteLine(msg.m_message);					
+			m_StreamWriter.WriteLine("msg Recieved: " + message);					
 			m_StreamWriter.Flush();
 		}
 
 		public void Login()
 		{
-			Message message = new Message("Hello Sever, My name is Bob");
-			string msgToSend = message.Serialize();
+			MessagePacket message = new MessagePacket("Hello Sever, My name is Bob");
+			//string msgToSend = message.Serialize();
 
-			TCPSendMessage(msgToSend);
+			TCPSendMessage(message);
 		}
 	}
 }

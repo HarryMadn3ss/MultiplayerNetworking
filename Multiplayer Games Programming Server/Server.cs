@@ -65,10 +65,22 @@ namespace Multiplayer_Games_Programming_Server
 			//m_Clients.AddOrUpdate(index, new ConnectedClient(socket));
 			try
 			{
-				string? message;
-				while((message = m_Clients[index].Read()) != null)
+				Packet? packet;
+				while((packet = m_Clients[index].Read()) != null)
 				{
-					m_Clients[index].Send(new Message(message));
+					switch (packet.Type)
+					{
+						case PacketType.MESSAGEPACKET:
+							MessagePacket mp = (MessagePacket)packet;
+							Console.WriteLine("Recieved Message: " + mp.m_message);
+							m_Clients[index].Send(new MessagePacket("Logged In!"));							
+							break;
+						case PacketType.POSITIONPACKET:
+							break;
+
+					}
+
+
 
 				}
 			}
