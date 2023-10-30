@@ -32,13 +32,12 @@ namespace Multiplayer_Games_Programming_Server
             //Message? msg = Message.Deserialize(message);   
             string? msg = m_StreamReader.ReadLine();
 
-            if (msg != null)
-            {
-                Packet? packet = Packet.Deserialize(msg);                
-                return packet;
-            }
+            
+            Packet? packet = Packet.Deserialize(msg);                
+            return packet;
+            
 
-            return null;    
+               
 
             
         }
@@ -46,9 +45,9 @@ namespace Multiplayer_Games_Programming_Server
         public void Send(Packet msgPacket)
         {
 
-            //string message = msgPacket.Serialize();
+            string message = msgPacket.Serialize();
 
-            //Console.WriteLine("Recived Message: " + message);
+            Console.WriteLine("Send: " + message);
 
             //msgPacket = new MessagePacket();
 

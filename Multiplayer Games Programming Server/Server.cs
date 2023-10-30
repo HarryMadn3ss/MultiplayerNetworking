@@ -36,8 +36,8 @@ namespace Multiplayer_Games_Programming_Server
                     //Console.WriteLine(Thread.CurrentThread.Name);
 					ConnectedClient conClient = new ConnectedClient(tempIndex, socket);
 					index++;
-                    Thread thread = new Thread(() => { ClientMethod(index); });
-					thread.Name = "Player Index: " + index.ToString();
+                    Thread thread = new Thread(() => { ClientMethod(tempIndex); });
+					thread.Name = "Player Index: " + tempIndex.ToString();
                     m_Clients.GetOrAdd(tempIndex, conClient);
 					thread.Start();
 				}
@@ -86,7 +86,7 @@ namespace Multiplayer_Games_Programming_Server
 			}
 			catch(Exception ex)
 			{
-			
+				Console.WriteLine("Error" + ex.Message);
 			}
 			
 			

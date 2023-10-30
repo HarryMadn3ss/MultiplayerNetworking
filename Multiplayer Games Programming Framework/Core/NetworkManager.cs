@@ -7,6 +7,7 @@ using System.Threading;
 using Multiplayer_Games_Programming_Packet_Library;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using System.Xml.Xsl;
 
 namespace Multiplayer_Games_Programming_Framework.Core
 {
@@ -85,16 +86,9 @@ namespace Multiplayer_Games_Programming_Framework.Core
 
 		public void TCPSendMessage(Packet? message)
 		{
+			string? msgToSend = message.Serialize();
 
-			//Message msg = new Message();
-			//string msgToRead = msg.Deserialize(message);
-			//Message? msg = Message.Deserialize(message);
-
-			//Packet.PrintToConsole(msg);
-
-			
-
-			m_StreamWriter.WriteLine("msg Recieved: " + message);					
+			m_StreamWriter.WriteLine(msgToSend);					
 			m_StreamWriter.Flush();
 		}
 
