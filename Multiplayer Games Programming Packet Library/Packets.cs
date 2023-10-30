@@ -37,12 +37,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
 			};
 
 			return JsonSerializer.Deserialize<Packet>(json, options);
-		}
-
-		//public static void PrintToConsole(Packet message)
-		//{
-		//	Console.WriteLine("Name: {0}, Message: {1}");
-		//}
+		}		
 	}
 
 	[Serializable]
@@ -61,23 +56,15 @@ namespace Multiplayer_Games_Programming_Packet_Library
 			Type = PacketType.MESSAGEPACKET;
 			m_message = message;
 		}
-
-        //public static MessagePacket? Deserialize(string json)
-        //{
-        //    var options = new JsonSerializerOptions
-        //    {
-        //        Converters = { new PacketConverter() },
-        //        IncludeFields = true,
-        //    };
-
-        //    return JsonSerializer.Deserialize<MessagePacket>(json, options);
-        //}
+		       
 
     }
 
 	[Serializable]
 	public class PositionPacket : Packet
 	{
+		[JsonPropertyName("Index")]
+		public int Index { get; protected set; }
 
 		[JsonPropertyName("PositionX")]
 		public float X { get; set; }
@@ -90,9 +77,10 @@ namespace Multiplayer_Games_Programming_Packet_Library
 			Type = PacketType.POSITIONPACKET;
 		}
 
-		public PositionPacket(float x, float y)
+		public PositionPacket(int index, float x, float y)
 		{
-			Type = PacketType.POSITIONPACKET;	
+			Type = PacketType.POSITIONPACKET;
+			Index = index;
 			X = x;
 			Y = y;
 		}

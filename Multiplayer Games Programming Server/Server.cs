@@ -76,7 +76,10 @@ namespace Multiplayer_Games_Programming_Server
 							m_Clients[index].Send(new MessagePacket("Logged In!"));							
 							break;
 						case PacketType.POSITIONPACKET:
+							PositionPacket pp = (PositionPacket)packet;
+							m_Clients[index].Send(new PositionPacket());
 							break;
+							
 
 					}
 

@@ -42,10 +42,10 @@ namespace Multiplayer_Games_Programming_Server
             
         }
 
-        public void Send(Packet msgPacket)
+        public void Send(Packet packet)
         {
 
-            string message = msgPacket.Serialize();
+            string message = packet.Serialize();
 
             Console.WriteLine("Send: " + message);
 
@@ -53,7 +53,7 @@ namespace Multiplayer_Games_Programming_Server
 
             
 
-            m_StreamWriter.WriteLine(msgPacket);            
+            m_StreamWriter.WriteLine(packet);            
 
             m_StreamWriter.Flush();
         }
