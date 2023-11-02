@@ -72,8 +72,6 @@ namespace Multiplayer_Games_Programming_Framework.Core
 			{
 				while(m_TcpClient.Connected)// while we are connected to the server
 				{
-
-
 					string message = m_StreamReader.ReadLine();
 					Debug.WriteLine(message);
 				}
@@ -84,11 +82,11 @@ namespace Multiplayer_Games_Programming_Framework.Core
 			}
 		}
 
-		public void TCPSendMessage(Packet? message)
+		public void TCPSendMessage(Packet? packet)
 		{
-			string? msgToSend = message.Serialize();
+			string? packetToSend = packet.Serialize();
 
-			m_StreamWriter.WriteLine(msgToSend);					
+			m_StreamWriter.WriteLine(packetToSend);					
 			m_StreamWriter.Flush();
 		}
 

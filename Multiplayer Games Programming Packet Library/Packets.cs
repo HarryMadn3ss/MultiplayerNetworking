@@ -9,6 +9,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
 	{
 		MESSAGEPACKET,
 		POSITIONPACKET,
+		LOGINPACKET,
 	}
 
 	[Serializable]
@@ -83,10 +84,28 @@ namespace Multiplayer_Games_Programming_Packet_Library
 			Index = index;
 			X = x;
 			Y = y;
-		}
+		}        
 
-	}
+    }
+	[Serializable]
+       public class LoginPacket : Packet
+       {
+           [JsonPropertyName("Index")]
+           public int? m_index;
 
+           public LoginPacket()
+           {
+               Type = PacketType.LOGINPACKET;
+           }
+
+           public LoginPacket(int index)
+           {
+               Type = PacketType.LOGINPACKET;
+               m_index = index;
+           }
+
+
+       }
 
 	[Serializable]
 	public class PacketConverter : JsonConverter<Packet> 
@@ -102,7 +121,15 @@ namespace Multiplayer_Games_Programming_Packet_Library
 					{
 						return JsonSerializer.Deserialize<MessagePacket>(root.GetRawText(), options);
 					}
-				}
+                    if (typeProperty.GetByte() == (byte)PacketType.POSITIONPACKET)
+                    {
+                        return JsonSerializer.Deserialize<MessagePacket>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.LOGINPACKET)
+                    {
+                        return JsonSerializer.Deserialize<MessagePacket>(root.GetRawText(), options);
+                    }
+                }
 			}
 
 				throw new NotImplementedException();

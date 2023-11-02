@@ -4,6 +4,8 @@ using nkast.Aether.Physics2D.Dynamics;
 using nkast.Aether.Physics2D.Dynamics.Contacts;
 using Multiplayer_Games_Programming_Framework.Core;
 using Multiplayer_Games_Programming_Packet_Library;
+using Multiplayer_Games_Programming_Framework.GameCode.Components;
+
 namespace Multiplayer_Games_Programming_Framework
 {
 	internal class PaddleController : Component
@@ -28,6 +30,8 @@ namespace Multiplayer_Games_Programming_Framework
 			if (Keyboard.GetState().IsKeyDown(Keys.Down)) { input.Y = 1; }
 
 			m_Rigidbody.m_Body.LinearVelocity = (m_Transform.Up * input.Y * m_Speed);
+
+			
 		}
 	}
 }

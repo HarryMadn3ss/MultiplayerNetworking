@@ -77,7 +77,16 @@ namespace Multiplayer_Games_Programming_Server
 							break;
 						case PacketType.POSITIONPACKET:
 							PositionPacket pp = (PositionPacket)packet;
-							m_Clients[index].Send(new PositionPacket());
+							Console.WriteLine("postision: " + pp.Index + pp.X + pp.Y);
+							if(index == 0)
+							{
+                                m_Clients[index + 1].Send(new PositionPacket());
+                            }
+							else
+							{
+								m_Clients[index].Send(new PositionPacket());
+
+							}
 							break;
 							
 

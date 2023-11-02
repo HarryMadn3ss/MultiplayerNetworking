@@ -16,8 +16,7 @@ namespace Multiplayer_Games_Programming_Server
                 m_Socket = socket;
                 m_Stream = new NetworkStream(socket, false);
                 m_StreamReader = new StreamReader(m_Stream, Encoding.UTF8);
-                m_StreamWriter = new StreamWriter(m_Stream, Encoding.UTF8);                 
-            
+                m_StreamWriter = new StreamWriter(m_Stream, Encoding.UTF8);          
            
             
         }
@@ -31,30 +30,18 @@ namespace Multiplayer_Games_Programming_Server
         {
             //Message? msg = Message.Deserialize(message);   
             string? msg = m_StreamReader.ReadLine();
-
-            
+                        
             Packet? packet = Packet.Deserialize(msg);                
-            return packet;
-            
-
-               
-
-            
+            return packet;            
         }
 
         public void Send(Packet packet)
         {
-
             string message = packet.Serialize();
 
             Console.WriteLine("Send: " + message);
-
-            //msgPacket = new MessagePacket();
-
             
-
             m_StreamWriter.WriteLine(packet);            
-
             m_StreamWriter.Flush();
         }
     }
