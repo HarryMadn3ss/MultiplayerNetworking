@@ -50,6 +50,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		public MessagePacket() 
 		{ 
 			Type = PacketType.MESSAGEPACKET;
+			m_message = "Not Initialized";
 		}
 
 		public MessagePacket(string message)
@@ -76,6 +77,9 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		public PositionPacket()
 		{
 			Type = PacketType.POSITIONPACKET;
+			Index = int.MaxValue;
+			X = float.MaxValue;
+			Y = float.MaxValue;
 		}
 
 		public PositionPacket(int index, float x, float y)
@@ -88,24 +92,25 @@ namespace Multiplayer_Games_Programming_Packet_Library
 
     }
 	[Serializable]
-       public class LoginPacket : Packet
-       {
-           [JsonPropertyName("Index")]
-           public int? m_index;
+    public class LoginPacket : Packet
+    {
+        [JsonPropertyName("Index")]
+        public int m_index;
 
-           public LoginPacket()
-           {
-               Type = PacketType.LOGINPACKET;
-           }
+        public LoginPacket()
+        {
+            Type = PacketType.LOGINPACKET;
+			m_index = int.MaxValue;
+        }
 
-           public LoginPacket(int index)
-           {
-               Type = PacketType.LOGINPACKET;
-               m_index = index;
-           }
+        public LoginPacket(int index)
+        {
+            Type = PacketType.LOGINPACKET;
+            m_index = index;
+        }
 
 
-       }
+    }
 
 	[Serializable]
 	public class PacketConverter : JsonConverter<Packet> 
@@ -123,11 +128,11 @@ namespace Multiplayer_Games_Programming_Packet_Library
 					}
                     if (typeProperty.GetByte() == (byte)PacketType.POSITIONPACKET)
                     {
-                        return JsonSerializer.Deserialize<MessagePacket>(root.GetRawText(), options);
+                        return JsonSerializer.Deserialize<PositionPacket>(root.GetRawText(), options);
                     }
                     if (typeProperty.GetByte() == (byte)PacketType.LOGINPACKET)
                     {
-                        return JsonSerializer.Deserialize<MessagePacket>(root.GetRawText(), options);
+                        return JsonSerializer.Deserialize<LoginPacket>(root.GetRawText(), options);
                     }
                 }
 			}

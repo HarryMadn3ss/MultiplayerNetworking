@@ -8,6 +8,7 @@ using Multiplayer_Games_Programming_Packet_Library;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using System.Xml.Xsl;
+using System.Xml.Linq;
 
 namespace Multiplayer_Games_Programming_Framework.Core
 {
@@ -32,6 +33,9 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		NetworkStream m_Stream;
 		StreamReader m_StreamReader;
 		StreamWriter m_StreamWriter;
+
+		public int m_index;
+
 
 		NetworkManager()
 		{
@@ -73,7 +77,48 @@ namespace Multiplayer_Games_Programming_Framework.Core
 				while(m_TcpClient.Connected)// while we are connected to the server
 				{
 					string message = m_StreamReader.ReadLine();
-					Debug.WriteLine(message);
+
+					Packet? packet = Packet.Deserialize(message);
+
+					if (packet != null)
+					{
+						switch (packet.Type)
+						{
+							case PacketType.MESSAGEPACKET:
+								//read msg and print to debug
+								MessagePacket mp = (MessagePacket)packet;
+								if (mp != null)
+								{
+									Debug.WriteLine($"Message: {mp.m_message}");
+								}
+								break;
+
+							case PacketType.POSITIONPACKET:
+								//update pos of indexed paddle
+								PositionPacket pp = (PositionPacket)packet;
+								if(pp != null)
+								{
+									//update postion
+								}
+								break;
+
+							case PacketType.LOGINPACKET:
+								//save assigned index
+								//put an if statemnet in the game scene to set the controls for the correct paddle
+								LoginPacket lp = (LoginPacket)packet;
+								if (lp != null)
+								{
+									m_index = lp.m_index;
+								}
+								//m_index = packet.
+								break;
+
+							default:
+								Debug.WriteLine($"Packet type invaild: NM! {packet.Type}");
+								break;
+						}
+					}
+
 				}
 			}
 			catch (Exception ex)
@@ -84,7 +129,8 @@ namespace Multiplayer_Games_Programming_Framework.Core
 
 		public void TCPSendMessage(Packet? packet)
 		{
-			string? packetToSend = packet.Serialize();
+			string? packetToSend = packet.Serialize();	
+
 
 			m_StreamWriter.WriteLine(packetToSend);					
 			m_StreamWriter.Flush();

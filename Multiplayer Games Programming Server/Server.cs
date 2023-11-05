@@ -30,16 +30,16 @@ namespace Multiplayer_Games_Programming_Server
 
 				while(true)
 				{
-                    Socket socket = m_TcpListener.AcceptSocket(); //blocking call so if no connections we will wait
-					int tempIndex = index;
+                    Socket socket = m_TcpListener.AcceptSocket(); //blocking call so if no connections we will wait					
                     Console.WriteLine("Connection Has Been Made");
                     //Console.WriteLine(Thread.CurrentThread.Name);
-					ConnectedClient conClient = new ConnectedClient(tempIndex, socket);
-					index++;
-                    Thread thread = new Thread(() => { ClientMethod(tempIndex); });
-					thread.Name = "Player Index: " + tempIndex.ToString();
-                    m_Clients.GetOrAdd(tempIndex, conClient);
+					ConnectedClient conClient = new ConnectedClient(index, socket);
+					conClient.Send(new LoginPacket(index));
+                    Thread thread = new Thread(() => { ClientMethod(index); });
+					thread.Name = "Player Index: " + index.ToString();
+                    m_Clients.GetOrAdd(index, conClient);
 					thread.Start();
+					index++;
 				}
 
 				//threads
@@ -77,14 +77,22 @@ namespace Multiplayer_Games_Programming_Server
 							break;
 						case PacketType.POSITIONPACKET:
 							PositionPacket pp = (PositionPacket)packet;
-							Console.WriteLine("postision: " + pp.Index + pp.X + pp.Y);
+							Console.WriteLine($"postision: Index: {pp.Index} X:{pp.X} Y:{pp.Y}");
 							if(index == 0)
 							{
-                                m_Clients[index + 1].Send(new PositionPacket());
+								ConnectedClient? receiver;
+								if (m_Clients.TryGetValue(index + 1, out receiver))
+								{
+									receiver.Send(new PositionPacket());
+								}
                             }
 							else
 							{
-								m_Clients[index].Send(new PositionPacket());
+								ConnectedClient? receiver;
+								if(m_Clients.TryGetValue((index - 1), out receiver))
+								{
+									m_Clients[index - 1].Send(new PositionPacket());
+								}
 
 							}
 							break;

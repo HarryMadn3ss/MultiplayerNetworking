@@ -36,7 +36,7 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components
         {
 			//monogame checks if there is a update that is overriding then calls thme
 			//need to update postion with the new position
-			UpdatePosition();
+			UpdatePosition(this.m_Transform.Position);
 
             base.Update(deltaTime);
         }
