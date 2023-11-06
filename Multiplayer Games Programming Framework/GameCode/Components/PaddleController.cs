@@ -5,6 +5,7 @@ using nkast.Aether.Physics2D.Dynamics.Contacts;
 using Multiplayer_Games_Programming_Framework.Core;
 using Multiplayer_Games_Programming_Packet_Library;
 using Multiplayer_Games_Programming_Framework.GameCode.Components;
+using System.Diagnostics;
 
 namespace Multiplayer_Games_Programming_Framework
 {
@@ -12,9 +13,12 @@ namespace Multiplayer_Games_Programming_Framework
 	{
 		float m_Speed;
 		Rigidbody m_Rigidbody;
-		public PaddleController(GameObject gameObject) : base(gameObject)
+		int m_index;
+
+		public PaddleController(GameObject gameObject, int index) : base(gameObject)
 		{
 			m_Speed = 10;
+			m_index = index;
 		}
 
 		protected override void Start(float deltaTime)
@@ -30,6 +34,11 @@ namespace Multiplayer_Games_Programming_Framework
 			if (Keyboard.GetState().IsKeyDown(Keys.Down)) { input.Y = 1; }
 
 			m_Rigidbody.m_Body.LinearVelocity = (m_Transform.Up * input.Y * m_Speed);
+
+			PositionPacket packet = new PositionPacket(m_index, this.m_Transform.Position.X, this.m_Transform.Position.Y);
+			NetworkManager.m_Instance.TCPSendMessage(packet);
+
+			Debug.WriteLine($"Pos of Player: {packet.X} {packet.Y}");
 
 			
 		}

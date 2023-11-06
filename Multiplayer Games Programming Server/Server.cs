@@ -96,8 +96,11 @@ namespace Multiplayer_Games_Programming_Server
 
 							}
 							break;
-							
+						case PacketType.LOGINPACKET:
+							LoginPacket lp = (LoginPacket)packet;
+							Console.WriteLine($"login: {lp.m_index}");
 
+							break;
 					}
 
 

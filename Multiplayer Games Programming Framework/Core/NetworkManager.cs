@@ -9,6 +9,7 @@ using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using System.Xml.Xsl;
 using System.Xml.Linq;
+using Multiplayer_Games_Programming_Framework.GameCode.Components;
 
 namespace Multiplayer_Games_Programming_Framework.Core
 {
@@ -35,6 +36,11 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		StreamWriter m_StreamWriter;
 
 		public int m_index;
+
+		PaddleNetworkController m_Controller;
+
+		//events
+		//public dictoionary < int, Action<vector2> m_playerpostions
 
 
 		NetworkManager()
@@ -99,7 +105,7 @@ namespace Multiplayer_Games_Programming_Framework.Core
 								if(pp != null)
 								{
 									//update postion
-									
+									m_Controller.UpdatePosition(new Vector2(pp.X, pp.Y));
 								}
 								break;
 

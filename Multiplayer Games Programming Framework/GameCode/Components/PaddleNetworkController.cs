@@ -9,6 +9,7 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components
 	{
 		int m_Index;
 		Rigidbody m_Rigidbody;
+		
 
 		public PaddleNetworkController(GameObject gameObject, int index) : base(gameObject)
 		{
@@ -25,10 +26,10 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components
 			m_Rigidbody.UpdatePosition(pos);
 
 			//packet
-			PositionPacket packet = new PositionPacket(m_Index, pos.X, pos.Y);
-			NetworkManager.m_Instance.TCPSendMessage(packet);
+			//PositionPacket packet = new PositionPacket(m_Index, this.m_Transform.Position.X, this.m_Transform.Position.Y);
+			//NetworkManager.m_Instance.TCPSendMessage(packet);
 			
-			Debug.WriteLine(packet.X.ToString() + packet.Y.ToString());			
+			//Debug.WriteLine(packet.X.ToString() + packet.Y.ToString());			
 			
 		}
 
@@ -36,6 +37,9 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components
         {
 			//monogame checks if there is a update that is overriding then calls thme
 			//need to update postion with the new position
+
+			
+
 			UpdatePosition(this.m_Transform.Position);
 
             base.Update(deltaTime);
