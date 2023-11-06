@@ -39,6 +39,8 @@ namespace Multiplayer_Games_Programming_Server
 					thread.Name = "Player Index: " + index.ToString();
                     m_Clients.GetOrAdd(index, conClient);
 					thread.Start();
+					LoginPacket loginPacket = new LoginPacket(index);
+					conClient.Send(loginPacket);
 					index++;
 				}
 
@@ -83,7 +85,7 @@ namespace Multiplayer_Games_Programming_Server
 								ConnectedClient? receiver;
 								if (m_Clients.TryGetValue(index + 1, out receiver))
 								{
-									receiver.Send(new PositionPacket());
+									receiver.Send(new PositionPacket(pp.Index, pp.X, pp.Y));
 								}
                             }
 							else
@@ -91,14 +93,15 @@ namespace Multiplayer_Games_Programming_Server
 								ConnectedClient? receiver;
 								if(m_Clients.TryGetValue((index - 1), out receiver))
 								{
-									m_Clients[index - 1].Send(new PositionPacket());
+									m_Clients[index - 1].Send(new PositionPacket(pp.Index, pp.X, pp.Y));
 								}
 
 							}
 							break;
 						case PacketType.LOGINPACKET:
 							LoginPacket lp = (LoginPacket)packet;
-							Console.WriteLine($"login: {lp.m_index}");
+							//Console.WriteLine($"login: {lp.m_index}");
+							m_Clients[index].Send(new LoginPacket(index));
 
 							break;
 					}

@@ -66,7 +66,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
 	public class PositionPacket : Packet
 	{
 		[JsonPropertyName("Index")]
-		public int Index { get; protected set; }
+		public int Index { get; set; }
 
 		[JsonPropertyName("PositionX")]
 		public float X { get; set; }
@@ -94,8 +94,8 @@ namespace Multiplayer_Games_Programming_Packet_Library
 	[Serializable]
     public class LoginPacket : Packet
     {
-        [JsonPropertyName("Index")]
-        public int m_index;
+		[JsonPropertyName("Index")]
+		public int m_index { get; set; }
 
         public LoginPacket()
         {

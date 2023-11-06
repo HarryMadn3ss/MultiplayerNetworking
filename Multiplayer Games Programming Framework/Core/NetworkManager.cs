@@ -113,11 +113,11 @@ namespace Multiplayer_Games_Programming_Framework.Core
 								//save assigned index
 								//put an if statemnet in the game scene to set the controls for the correct paddle
 								LoginPacket lp = (LoginPacket)packet;
-								if (lp != null)
-								{
+								//if (lp != null)
+								//{
 									m_index = lp.m_index;
-								}
-								//m_index = packet.
+								//}
+								
 								break;
 
 							default:
