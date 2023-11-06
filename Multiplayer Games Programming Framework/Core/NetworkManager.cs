@@ -99,6 +99,7 @@ namespace Multiplayer_Games_Programming_Framework.Core
 								if(pp != null)
 								{
 									//update postion
+									
 								}
 								break;
 
@@ -138,7 +139,7 @@ namespace Multiplayer_Games_Programming_Framework.Core
 
 		public void Login()
 		{
-			MessagePacket message = new MessagePacket("Hello Sever, My name is Bob");
+			LoginPacket message = new LoginPacket(m_index);
 			//string msgToSend = message.Serialize();
 
 			TCPSendMessage(message);
