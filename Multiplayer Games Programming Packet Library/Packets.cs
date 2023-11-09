@@ -10,6 +10,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		MESSAGEPACKET,
 		POSITIONPACKET,
 		LOGINPACKET,
+		BALLPACKET,
 	}
 
 	[Serializable]
@@ -111,8 +112,32 @@ namespace Multiplayer_Games_Programming_Packet_Library
 
 
     }
+    [Serializable]
+    public class BallPacket : Packet
+    {    
+        [JsonPropertyName("PositionX")]
+        public float X { get; set; }
 
-	[Serializable]
+        [JsonPropertyName("PositionY")]
+        public float Y { get; set; }
+
+        public BallPacket()
+        {
+            Type = PacketType.BALLPACKET;
+            X = float.MaxValue;
+            Y = float.MaxValue;
+        }
+
+        public BallPacket(float x, float y)
+        {
+            Type = PacketType.BALLPACKET;            
+            X = x;
+            Y = y;
+        }
+
+    }
+
+    [Serializable]
 	public class PacketConverter : JsonConverter<Packet> 
 	{
         public override Packet? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -133,6 +158,10 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     if (typeProperty.GetByte() == (byte)PacketType.LOGINPACKET)
                     {
                         return JsonSerializer.Deserialize<LoginPacket>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.BALLPACKET)
+                    {
+                        return JsonSerializer.Deserialize<BallPacket>(root.GetRawText(), options);
                     }
                 }
 			}

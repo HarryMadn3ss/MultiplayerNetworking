@@ -2,6 +2,9 @@
 using Microsoft.Xna.Framework;
 using nkast.Aether.Physics2D.Dynamics;
 using nkast.Aether.Physics2D.Dynamics.Contacts;
+using Multiplayer_Games_Programming_Framework.Core;
+using Multiplayer_Games_Programming_Packet_Library;
+using System;
 
 namespace Multiplayer_Games_Programming_Framework
 {
@@ -36,5 +39,26 @@ namespace Multiplayer_Games_Programming_Framework
 			Vector2 reflection =  Vector2.Reflect(velocity, normal);
 			m_Rigidbody.m_Body.LinearVelocity = reflection * 1.0f;
 		}
-	}
+        public void UpdatePosition(Vector2 pos)
+        {
+            m_Rigidbody.UpdatePosition(pos);
+
+        }
+
+        protected override void Update(float deltaTime)
+        {    
+			if(NetworkManager.m_Instance.m_ballPositionUpdate.X != 0 && NetworkManager.m_Instance.m_ballPositionUpdate.Y != 0)
+			{
+				UpdatePosition(NetworkManager.m_Instance.m_ballPositionUpdate);
+            }
+
+			if(NetworkManager.m_Instance.m_index == 0)
+			{
+				BallPacket packet = new BallPacket(this.m_Transform.Position.X, this.m_Transform.Position.Y);
+				NetworkManager.m_Instance.TCPSendMessage(packet);
+			}
+
+            base.Update(deltaTime);
+        }
+    }
 }

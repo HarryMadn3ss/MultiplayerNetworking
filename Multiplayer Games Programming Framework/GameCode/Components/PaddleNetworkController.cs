@@ -40,7 +40,7 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components
 
 			
 
-			UpdatePosition(this.m_Transform.Position);
+			UpdatePosition(NetworkManager.m_Instance.m_positionUpdate);
 
             base.Update(deltaTime);
         }

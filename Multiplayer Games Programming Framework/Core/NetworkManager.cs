@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework;
 using System.Xml.Xsl;
 using System.Xml.Linq;
 using Multiplayer_Games_Programming_Framework.GameCode.Components;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Multiplayer_Games_Programming_Framework.Core
 {
@@ -36,8 +37,12 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		StreamWriter m_StreamWriter;
 
 		public int m_index;
+		public Vector2 m_positionUpdate;
+		public Vector2 m_ballPositionUpdate;
+		
 
-		PaddleNetworkController m_Controller;
+		
+		
 
 		//events
 		//public dictoionary < int, Action<vector2> m_playerpostions
@@ -105,7 +110,12 @@ namespace Multiplayer_Games_Programming_Framework.Core
 								if(pp != null)
 								{
 									//update postion
-									m_Controller.UpdatePosition(new Vector2(pp.X, pp.Y));
+									//if(m_Controller != null)
+									//{
+									//	m_Controller.UpdatePosition(new Vector2(pp.X, pp.Y));
+									//}
+									
+									m_positionUpdate = new Vector2(pp.X, pp.Y);
 								}
 								break;
 
@@ -119,8 +129,16 @@ namespace Multiplayer_Games_Programming_Framework.Core
 								//}
 								
 								break;
+                            case PacketType.BALLPACKET:
+                                //update pos of indexed paddle
+                                BallPacket bp = (BallPacket)packet;
+                                if (bp != null)
+                                {
+                                    m_ballPositionUpdate = new Vector2(bp.X, bp.Y);
+                                }
+                                break;
 
-							default:
+                            default:
 								Debug.WriteLine($"Packet type invaild: NM! {packet.Type}");
 								break;
 						}
@@ -145,10 +163,10 @@ namespace Multiplayer_Games_Programming_Framework.Core
 
 		public void Login()
 		{
-			LoginPacket message = new LoginPacket(m_index);
+			LoginPacket loginPacket = new LoginPacket(m_index);
 			//string msgToSend = message.Serialize();
 
-			TCPSendMessage(message);
+			TCPSendMessage(loginPacket);
 		}
 	}
 }

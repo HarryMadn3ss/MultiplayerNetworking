@@ -16,7 +16,7 @@ namespace Multiplayer_Games_Programming_Framework
 
 		BallGO m_Ball;
 		PaddleGO m_PlayerPaddle;
-		PaddleGO m_RemotePaddle;
+		public PaddleGO m_RemotePaddle;
 
 		BallControllerComponent m_BallController;
 

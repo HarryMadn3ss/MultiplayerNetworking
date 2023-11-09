@@ -41,7 +41,7 @@ namespace Multiplayer_Games_Programming_Server
 
             Console.WriteLine("Send: " + message);
             
-            m_StreamWriter.WriteLine(packet);            
+            m_StreamWriter.WriteLine(message);            
             m_StreamWriter.Flush();
         }
     }

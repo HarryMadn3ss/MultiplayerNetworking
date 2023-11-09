@@ -99,12 +99,34 @@ namespace Multiplayer_Games_Programming_Server
 							}
 							break;
 						case PacketType.LOGINPACKET:
-							LoginPacket lp = (LoginPacket)packet;
-							//Console.WriteLine($"login: {lp.m_index}");
+							LoginPacket lp = (LoginPacket)packet;							
 							m_Clients[index].Send(new LoginPacket(index));
-
 							break;
-					}
+
+                        case PacketType.BALLPACKET:
+                            BallPacket bp = (BallPacket)packet;                            
+                            if (index == 0)
+                            {
+                                ConnectedClient? receiver;
+                                if (m_Clients.TryGetValue(index + 1, out receiver))
+                                {
+                                    receiver.Send(new BallPacket(bp.X, bp.Y));
+                                }
+                            }
+                            else
+                            {
+                                ConnectedClient? receiver;
+                                if (m_Clients.TryGetValue((index - 1), out receiver))
+                                {
+                                    m_Clients[index - 1].Send(new BallPacket(bp.X, bp.Y));
+                                }
+
+                            }
+                            break;
+
+
+						default: break;
+                    }
 
 
 
