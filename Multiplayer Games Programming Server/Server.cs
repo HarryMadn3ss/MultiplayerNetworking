@@ -79,7 +79,7 @@ namespace Multiplayer_Games_Programming_Server
 							break;
 						case PacketType.POSITIONPACKET:
 							PositionPacket pp = (PositionPacket)packet;
-							Console.WriteLine($"postision: Index: {pp.Index} X:{pp.X} Y:{pp.Y}");
+							//Console.WriteLine($"postision: Index: {pp.Index} X:{pp.X} Y:{pp.Y}");
 							if(index == 0)
 							{
 								ConnectedClient? receiver;

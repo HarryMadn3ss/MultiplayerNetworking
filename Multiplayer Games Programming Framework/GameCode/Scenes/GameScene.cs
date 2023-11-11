@@ -7,12 +7,16 @@ using Multiplayer_Games_Programming_Framework.Core;
 using System.Data;
 using System.Diagnostics;
 using Multiplayer_Games_Programming_Framework.GameCode.Components;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Multiplayer_Games_Programming_Framework
 {
 	internal class GameScene : Scene
 	{
 		List<GameObject> m_GameObjects = new();
+
+		private GraphicsDevice m_GraphicsDevice; 
+        SpriteBatch m_spriteBatch;
 
 		BallGO m_Ball;
 		PaddleGO m_PlayerPaddle;
@@ -29,7 +33,10 @@ namespace Multiplayer_Games_Programming_Framework
 		public GameScene(SceneManager manager) : base(manager)
 		{
 			m_GameModeState = GameModeState.AWAKE;
-		}
+
+			
+			//m_GraphicsDevice = new GraphicsDeviceManager(this);
+        }
 
 		public override void LoadContent()
 		{
@@ -74,6 +81,10 @@ namespace Multiplayer_Games_Programming_Framework
 				new Vector2(screenWidth/10, 10), //bottom
 				new Vector2(10, screenHeight/10) //left
 			};
+
+			//txt
+			m_spriteBatch = new SpriteBatch(m_GraphicsDevice);
+			
 
 			for (int i = 0; i < 4; i++)
 			{
@@ -133,6 +144,16 @@ namespace Multiplayer_Games_Programming_Framework
 				default:
 					break;
 			}
+		}
+
+		void Draw(float deltaTime)
+		{
+
+            m_spriteBatch.Begin();
+            m_spriteBatch.DrawString(default, "Score: ", new Vector2(0, 0), Color.Black);
+			m_spriteBatch.End();
+
+            base.Draw(deltaTime);
 		}
 	}
 }

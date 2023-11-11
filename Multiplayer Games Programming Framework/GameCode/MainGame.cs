@@ -60,6 +60,12 @@ namespace Multiplayer_Games_Programming_Framework
 
             m_SceneManager.Draw(deltaTime);
 
+            //if(GameModeState.PLAYING)
+            //{
+
+            //}
+            //m_SpriteBatch.DrawString(default, "Score: ", new Vector2(0, 0), Color.Black);
+
             m_SpriteBatch.End();
             
             base.Draw(gameTime);
