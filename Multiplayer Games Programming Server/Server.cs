@@ -10,6 +10,7 @@ namespace Multiplayer_Games_Programming_Server
 	internal class Server
 	{
 		TcpListener m_TcpListener; //listens for tcp connections on certain ip addresses
+		UdpClient m_UdpListener; //listen for udp responses
 
 		ConcurrentDictionary<int, ConnectedClient> m_Clients;
 
@@ -17,6 +18,7 @@ namespace Multiplayer_Games_Programming_Server
 		{
 			IPAddress ip = IPAddress.Parse(ipAddress);
 			m_TcpListener = new TcpListener(ip, port);
+			m_UdpListener = new UdpClient(port);
 			m_Clients = new ConcurrentDictionary<int, ConnectedClient>();
 		}
 
@@ -24,6 +26,7 @@ namespace Multiplayer_Games_Programming_Server
 		{
 			try //try this code
 			{
+				UDPListen();
 				m_TcpListener.Start();
 				Console.WriteLine("Server Started.....");
 				int index = 0;
@@ -77,6 +80,7 @@ namespace Multiplayer_Games_Programming_Server
 							Console.WriteLine("Recieved Message: " + mp.m_message);
 							m_Clients[index].Send(new MessagePacket("Logged In!"));							
 							break;
+
 						case PacketType.POSITIONPACKET:
 							PositionPacket pp = (PositionPacket)packet;
 							//Console.WriteLine($"postision: Index: {pp.Index} X:{pp.X} Y:{pp.Y}");
@@ -98,6 +102,7 @@ namespace Multiplayer_Games_Programming_Server
 
 							}
 							break;
+
 						case PacketType.LOGINPACKET:
 							LoginPacket lp = (LoginPacket)packet;							
 							m_Clients[index].Send(new LoginPacket(index));
@@ -124,23 +129,30 @@ namespace Multiplayer_Games_Programming_Server
                             }
                             break;
 
-
 						default: break;
                     }
-
-
-
 				}
 			}
 			catch(Exception ex)
 			{
 				Console.WriteLine("Error" + ex.Message);
 			}
-			
-			
+		}
 
-			
+		async Task UDPListen()
+		{
+			while(true)
+			{
+				UdpReceiveResult receiveResult = await m_UdpListener.ReceiveAsync();
+				byte[] receivedData = receiveResult.Buffer;
 
+				string message = Encoding.UTF8.GetString(receivedData, 0, receivedData.Length);
+				Console.WriteLine("UDP msg Received: " + message);
+
+				byte[] bytes = Encoding.UTF8.GetBytes("Hello");
+
+				m_UdpListener.SendAsync(bytes, bytes.Length, receiveResult.RemoteEndPoint);
+			}
 		}
 	}
 }

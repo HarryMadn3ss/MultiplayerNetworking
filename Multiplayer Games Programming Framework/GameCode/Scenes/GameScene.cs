@@ -15,8 +15,10 @@ namespace Multiplayer_Games_Programming_Framework
 	{
 		List<GameObject> m_GameObjects = new();
 
-		private GraphicsDevice m_GraphicsDevice; 
-        SpriteBatch m_spriteBatch;
+		SpriteBatch m_spriteBatch;
+		SpriteFont m_font;
+		
+		
 
 		BallGO m_Ball;
 		PaddleGO m_PlayerPaddle;
@@ -42,7 +44,14 @@ namespace Multiplayer_Games_Programming_Framework
 		{
 			base.LoadContent();
 
-			float screenWidth = Constants.m_ScreenWidth;
+			//txt
+            m_spriteBatch = GetSpriteBatch();
+			
+			m_font =  GetContentManager().Load<SpriteFont>("font");
+
+
+
+            float screenWidth = Constants.m_ScreenWidth;
 			float screenHeight = Constants.m_ScreenHeight;
 
 			m_Ball = GameObject.Instantiate<BallGO>(this, new Transform(new Vector2(screenWidth / 2, screenHeight / 2), new Vector2(1, 1), 0));
@@ -82,8 +91,7 @@ namespace Multiplayer_Games_Programming_Framework
 				new Vector2(10, screenHeight/10) //left
 			};
 
-			//txt
-			m_spriteBatch = new SpriteBatch(m_GraphicsDevice);
+			
 			
 
 			for (int i = 0; i < 4; i++)
@@ -146,14 +154,12 @@ namespace Multiplayer_Games_Programming_Framework
 			}
 		}
 
-		void Draw(float deltaTime)
+		public override void Draw(float deltaTime)
 		{
-
-            m_spriteBatch.Begin();
-            m_spriteBatch.DrawString(default, "Score: ", new Vector2(0, 0), Color.Black);
-			m_spriteBatch.End();
-
-            base.Draw(deltaTime);
+			base.Draw(deltaTime);			
+			m_spriteBatch.DrawString(m_font, "Player One: ", new Vector2(100, 10), Color.CornflowerBlue, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
+			m_spriteBatch.DrawString(m_font, "Player Two: ", new Vector2(400, 10), Color.CornflowerBlue, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
+			
 		}
 	}
 }

@@ -11,6 +11,7 @@ using System.Xml.Xsl;
 using System.Xml.Linq;
 using Multiplayer_Games_Programming_Framework.GameCode.Components;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 namespace Multiplayer_Games_Programming_Framework.Core
 {
@@ -32,6 +33,8 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		}
 
 		TcpClient m_TcpClient;
+		UdpClient m_UdpClient;
+
 		NetworkStream m_Stream;
 		StreamReader m_StreamReader;
 		StreamWriter m_StreamWriter;
@@ -51,6 +54,7 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		NetworkManager()
 		{
 			m_TcpClient = new TcpClient();
+			m_UdpClient = new UdpClient();
 		}
 
 		public bool Connect(string ip, int port)
@@ -58,6 +62,8 @@ namespace Multiplayer_Games_Programming_Framework.Core
 			try
 			{
 				m_TcpClient.Connect(ip, port);
+				m_UdpClient.Connect(ip, port);
+
 				m_Stream = m_TcpClient.GetStream();
 				m_StreamReader = new StreamReader(m_Stream, Encoding.UTF8);
 				m_StreamWriter = new StreamWriter(m_Stream, Encoding.UTF8);
@@ -78,6 +84,8 @@ namespace Multiplayer_Games_Programming_Framework.Core
 			Thread TcpThread = new Thread(new ThreadStart(TcpProcessServerResponse));
 			TcpThread.Name = "TCP Thread";
 			TcpThread.Start();
+									
+            UdpProcessSeverResponse();		
 		}
 
 		private void TcpProcessServerResponse()
@@ -168,5 +176,33 @@ namespace Multiplayer_Games_Programming_Framework.Core
 
 			TCPSendMessage(loginPacket);
 		}
+
+		async Task UdpProcessSeverResponse()
+		{
+			try
+			{
+				while(m_TcpClient.Connected)
+				{
+					UdpReceiveResult receiveResult = await m_UdpClient.ReceiveAsync();
+					byte[] receivedData = receiveResult.Buffer;
+
+					string message = Encoding.UTF8.GetString(receivedData, 0, receivedData.Length);
+					Console.WriteLine("UDP Msg Received: " + message);
+				}
+			}
+			catch(SocketException e)
+			{
+				Console.WriteLine("UDP Client Read Err" + e.Message);
+			}
+		}
+
+		public void UdpSendMessage(Packet packet)
+		{
+			string? packetToSend = packet.Serialize();
+
+			byte[] bytes = Encoding.UTF8.GetBytes(packetToSend);
+			m_UdpClient.Send(bytes, bytes.Length);
+		}
+
 	}
 }

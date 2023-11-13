@@ -11,6 +11,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		POSITIONPACKET,
 		LOGINPACKET,
 		BALLPACKET,
+		SCOREPACKET,
 	}
 
 	[Serializable]
@@ -136,6 +137,26 @@ namespace Multiplayer_Games_Programming_Packet_Library
         }
 
     }
+    [Serializable]
+    public class ScorePacket : Packet
+    {
+        [JsonPropertyName("Index")]
+        public int? m_index;
+
+        public ScorePacket()
+        {
+            Type = PacketType.SCOREPACKET;
+            m_index = int.MaxValue;
+        }
+
+        public ScorePacket(int index)
+        {
+            Type = PacketType.SCOREPACKET;
+            m_index = index;
+        }
+
+
+    }
 
     [Serializable]
 	public class PacketConverter : JsonConverter<Packet> 
@@ -162,6 +183,10 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     if (typeProperty.GetByte() == (byte)PacketType.BALLPACKET)
                     {
                         return JsonSerializer.Deserialize<BallPacket>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.SCOREPACKET)
+                    {
+                        return JsonSerializer.Deserialize<ScorePacket>(root.GetRawText(), options);
                     }
                 }
 			}
