@@ -12,6 +12,8 @@ namespace Multiplayer_Games_Programming_Framework
         public Scene m_Scene { get; private set; }
         public Transform m_Transform;
 
+		
+
         List<Component> m_GameComponents;
 
 		event Action<float> OnStartCalls;

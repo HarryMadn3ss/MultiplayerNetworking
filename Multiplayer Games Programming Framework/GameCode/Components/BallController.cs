@@ -37,7 +37,7 @@ namespace Multiplayer_Games_Programming_Framework
 			Vector2 normal = contact.Manifold.LocalNormal;
 			Vector2 velocity = m_Rigidbody.m_Body.LinearVelocity;
 			Vector2 reflection =  Vector2.Reflect(velocity, normal);
-			m_Rigidbody.m_Body.LinearVelocity = reflection * 1.0f;
+			m_Rigidbody.m_Body.LinearVelocity = reflection * 1.0f;			
 		}
         public void UpdatePosition(Vector2 pos)
         {

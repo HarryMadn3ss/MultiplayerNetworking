@@ -101,6 +101,16 @@ namespace Multiplayer_Games_Programming_Framework
 				Rigidbody rb = go.AddComponent(new Rigidbody(go, BodyType.Static, 10, sr.m_Size / 2));
 				rb.CreateRectangle(sr.m_Size.X, sr.m_Size.Y, 0.0f, 1.0f, Vector2.Zero, Constants.GetCategoryByName("Wall"), Constants.GetCategoryByName("All"));
 				go.AddComponent(new ChangeColourOnCollision(go, Color.Red));
+				
+				if(i == 1)
+				{
+					go.AddComponent(new )
+				}
+				if(i == 3)
+				{
+					//left
+				}
+
 				m_GameObjects.Add(go);
 			}
 		}
@@ -118,6 +128,8 @@ namespace Multiplayer_Games_Programming_Framework
 		public override void Update(float deltaTime)
 		{
 			base.Update(deltaTime);
+
+			
 
 			m_GameTimer += deltaTime;
 
