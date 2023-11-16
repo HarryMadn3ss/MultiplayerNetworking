@@ -152,7 +152,7 @@ namespace Multiplayer_Games_Programming_Framework
 
 					if(m_GameTimer > 60)
 					{
-						m_Ball.Destroy();						
+						//m_Ball.Destroy();						
 						m_GameModeState = GameModeState.ENDING;
 					}
 

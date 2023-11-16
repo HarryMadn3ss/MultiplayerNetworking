@@ -193,8 +193,22 @@ namespace Multiplayer_Games_Programming_Framework.Core
 					UdpReceiveResult receiveResult = await m_UdpClient.ReceiveAsync();
 					byte[] receivedData = receiveResult.Buffer;
 
-					string message = Encoding.UTF8.GetString(receivedData, 0, receivedData.Length);
-					Console.WriteLine("UDP Msg Received: " + message);
+                    string message = Encoding.UTF8.GetString(receivedData, 0, receivedData.Length);
+                    Packet? packet = Packet.Deserialize(message);
+
+                    switch (packet.Type)
+					{
+						case PacketType.SCOREPACKET:
+                        ScorePacket sp = (ScorePacket)packet;
+                        m_playerOneScore = sp.m_playerOneScore;
+                        m_playerTwoScore = sp.m_playerTwoScore;
+                        break;
+
+						default: break;
+					}
+                   
+
+					//Console.WriteLine("UDP Msg Received: " + message);
 				}
 			}
 			catch(SocketException e)

@@ -12,6 +12,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		LOGINPACKET,
 		BALLPACKET,
 		SCOREPACKET,
+        ENCRYPTEDPACKET,
 	}
 
 	[Serializable]
@@ -167,9 +168,32 @@ namespace Multiplayer_Games_Programming_Packet_Library
 			m_playerOneScore = playerOne;
 			m_playerTwoScore = playerTwo;
 		}
-
-
     }
+
+  //  [Serializable]
+  //  public class EncryptedPacket : Packet
+  //  {
+		//[JsonPropertyName("Data")]
+		//public byte[] m_encryptedData;
+
+  //      [JsonPropertyName("Index")]
+  //      public int? m_index;
+
+  //      public EncyrptedPacket()
+  //      {
+		//	Type = PacketType.ENCRYPTEDPACKET;
+  //          m_encryptedData = new byte[0];
+  //      }
+
+		//public EncryptedPacket(int index, byte[] encryptedData)
+		//{
+  //          Type = PacketType.ENCRYPTEDPACKET;
+  //          m_encryptedData = encryptedData;
+		//	m_index = index;
+  //      }
+        
+
+  //  }
 
     [Serializable]
 	public class PacketConverter : JsonConverter<Packet> 
@@ -201,6 +225,10 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     {
                         return JsonSerializer.Deserialize<ScorePacket>(root.GetRawText(), options);
                     }
+                    //if (typeProperty.GetByte() == (byte)PacketType.ENCYPTEDPACKET)
+                    //{
+                    //    return JsonSerializer.Deserialize<EncryptedPacket>(root.GetRawText(), options);
+                    //}
                 }
 			}
 

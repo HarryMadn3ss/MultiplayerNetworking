@@ -4,6 +4,7 @@ using System.Net;
 using Multiplayer_Games_Programming_Packet_Library;
 using System.Linq.Expressions;
 using System.Text;
+using System;
 
 namespace Multiplayer_Games_Programming_Server
 {
@@ -169,25 +170,45 @@ namespace Multiplayer_Games_Programming_Server
 				byte[] receivedData = receiveResult.Buffer;
 
 				string message = Encoding.UTF8.GetString(receivedData, 0, receivedData.Length);
-				Console.WriteLine("UDP msg Received: " + message);
+
+				Packet? packet = Packet.Deserialize(message);
 
 				byte[] bytes = Encoding.UTF8.GetBytes("Hello");
 
 				m_UdpListener.SendAsync(bytes, bytes.Length, receiveResult.RemoteEndPoint);
+				//switch (packet.Type)
+				//{
+				//	case PacketType.SCOREPACKET:
+				//		ScorePacket sp = (ScorePacket)packet;
+				//		if (sp.m_index == 1)
+				//		{
+				//			playerOneScore++;
+				//		}
+				//		else if (sp.m_index == 0)
+				//		{
+				//			playerTwoScore++;
+				//		}
+				//		byte[] bytes = Encoding.UTF8.GetBytes(new ScorePacket(playerOneScore, playerTwoScore));
+
+				//		m_UdpListener.SendAsync(bytes, bytes.Length, receiveResult.RemoteEndPoint);
+
+				//m_Clients[index].Send(new ScorePacket(playerOneScore, playerTwoScore));
+				//ConnectedClient? receiverClient;
+				//if (m_Clients.TryGetValue(index + 1, out receiverClient))
+				//{
+				//	receiverClient.Send(new ScorePacket(playerOneScore, playerTwoScore));
+				//}
+
+				//break;
+
+				//	default: break;
+				//}
+				//Console.WriteLine("UDP msg Received: " + message);
+
+				//byte[] bytes = Encoding.UTF8.GetBytes("Hello");
+
+
 			}
 		}
-
-		void ScoreManager(int index)
-		{
-			if(index == 0)
-			{
-				playerOneScore++;
-			}
-			else if (index == 1) 
-			{
-				playerTwoScore++;
-			}
-		}
-
 	}
 }
