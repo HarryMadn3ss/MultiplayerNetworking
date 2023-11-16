@@ -12,6 +12,10 @@ namespace Multiplayer_Games_Programming_Server
 		TcpListener m_TcpListener; //listens for tcp connections on certain ip addresses
 		UdpClient m_UdpListener; //listen for udp responses
 
+		//score
+		int playerOneScore = 0;
+		int playerTwoScore = 0;
+
 		ConcurrentDictionary<int, ConnectedClient> m_Clients;
 
 		public Server(string ipAddress, int port)
@@ -128,6 +132,22 @@ namespace Multiplayer_Games_Programming_Server
 
                             }
                             break;
+						case PacketType.SCOREPACKET:
+							ScorePacket sp = (ScorePacket)packet;
+                            if (sp.m_index == 1)
+                            {
+                                playerOneScore++;
+                            }
+                            else if (sp.m_index == 0)
+                            {
+                                playerTwoScore++;
+                            }
+                            m_Clients[index].Send(new ScorePacket(playerOneScore, playerTwoScore));
+
+
+                            //m_Clients[index].Send(new ScorePacket(playerOneScore, playerTwoScore));
+                                                      
+							break;
 
 						default: break;
                     }
@@ -154,5 +174,18 @@ namespace Multiplayer_Games_Programming_Server
 				m_UdpListener.SendAsync(bytes, bytes.Length, receiveResult.RemoteEndPoint);
 			}
 		}
+
+		void ScoreManager(int index)
+		{
+			if(index == 0)
+			{
+				playerOneScore++;
+			}
+			else if (index == 1) 
+			{
+				playerTwoScore++;
+			}
+		}
+
 	}
 }

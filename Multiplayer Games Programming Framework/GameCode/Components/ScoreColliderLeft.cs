@@ -6,21 +6,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Multiplayer_Games_Programming_Packet_Library;
+using Multiplayer_Games_Programming_Framework.Core;
 
 namespace Multiplayer_Games_Programming_Framework.GameCode.Components
 {
-    internal class ScoreCollider : Component
+    internal class ScoreColliderLeft : Component
     {
 
 
-        public ScoreCollider(GameObject gameObject) : base(gameObject)
+        public ScoreColliderLeft(GameObject gameObject) : base(gameObject)
         {
 
         }
 
         protected override void OnCollisionEnter(Fixture sender, Fixture other, Contact contact)
         {
-            ScorePacket _scorePacket = new ScorePacket();
+            ScorePacket _scorePacket = new ScorePacket(0);
+            NetworkManager.m_Instance.TCPSendMessage(_scorePacket);
         }
     }
 }

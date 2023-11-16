@@ -42,7 +42,9 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		public int m_index;
 		public Vector2 m_positionUpdate;
 		public Vector2 m_ballPositionUpdate;
-		
+
+		public int m_playerOneScore;
+		public int m_playerTwoScore;
 
 		
 		
@@ -145,6 +147,12 @@ namespace Multiplayer_Games_Programming_Framework.Core
                                     m_ballPositionUpdate = new Vector2(bp.X, bp.Y);
                                 }
                                 break;
+
+							case PacketType.SCOREPACKET:
+								ScorePacket sp = (ScorePacket)packet;
+								m_playerOneScore = sp.m_playerOneScore;
+								m_playerTwoScore = sp.m_playerTwoScore;
+								break;
 
                             default:
 								Debug.WriteLine($"Packet type invaild: NM! {packet.Type}");

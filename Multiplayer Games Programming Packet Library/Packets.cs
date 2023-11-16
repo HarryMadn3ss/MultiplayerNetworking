@@ -143,6 +143,12 @@ namespace Multiplayer_Games_Programming_Packet_Library
         [JsonPropertyName("Index")]
         public int? m_index;
 
+        [JsonPropertyName("PlayerOneScore")]
+        public int m_playerOneScore;
+
+        [JsonPropertyName("PlayerTwoScore")]
+        public int m_playerTwoScore;
+
         public ScorePacket()
         {
             Type = PacketType.SCOREPACKET;
@@ -154,6 +160,13 @@ namespace Multiplayer_Games_Programming_Packet_Library
             Type = PacketType.SCOREPACKET;
             m_index = index;
         }
+
+		public ScorePacket(int playerOne, int playerTwo)
+		{
+			Type = PacketType.SCOREPACKET;
+			m_playerOneScore = playerOne;
+			m_playerTwoScore = playerTwo;
+		}
 
 
     }

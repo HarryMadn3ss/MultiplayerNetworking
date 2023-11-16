@@ -104,11 +104,12 @@ namespace Multiplayer_Games_Programming_Framework
 				
 				if(i == 1)
 				{
-					go.AddComponent(new )
+					go.AddComponent(new ScoreColliderRight(go));
 				}
 				if(i == 3)
 				{
 					//left
+					go.AddComponent(new ScoreColliderLeft(go));
 				}
 
 				m_GameObjects.Add(go);
@@ -169,8 +170,8 @@ namespace Multiplayer_Games_Programming_Framework
 		public override void Draw(float deltaTime)
 		{
 			base.Draw(deltaTime);			
-			m_spriteBatch.DrawString(m_font, "Player One: ", new Vector2(100, 10), Color.CornflowerBlue, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
-			m_spriteBatch.DrawString(m_font, "Player Two: ", new Vector2(400, 10), Color.CornflowerBlue, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
+			m_spriteBatch.DrawString(m_font, "Player One: " + NetworkManager.m_Instance.m_playerOneScore, new Vector2(100, 10), Color.CornflowerBlue, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
+			m_spriteBatch.DrawString(m_font, "Player Two: " + NetworkManager.m_Instance.m_playerTwoScore, new Vector2(400, 10), Color.CornflowerBlue, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
 			
 		}
 	}
