@@ -159,7 +159,6 @@ namespace Multiplayer_Games_Programming_Framework.Core
 								break;
 						}
 					}
-
 				}
 			}
 			catch (Exception ex)

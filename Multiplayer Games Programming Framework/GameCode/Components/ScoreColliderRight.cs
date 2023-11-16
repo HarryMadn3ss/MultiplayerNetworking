@@ -21,8 +21,14 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components
 
         protected override void OnCollisionEnter(Fixture sender, Fixture other, Contact contact)
         {
-            ScorePacket _scorePacket = new ScorePacket(1);            
-            NetworkManager.m_Instance.TCPSendMessage(_scorePacket);
+            if (NetworkManager.m_Instance.m_index == 0)
+            {
+                ScorePacket _scorePacket = new ScorePacket(1);
+                NetworkManager.m_Instance.TCPSendMessage(_scorePacket);
+            }
         }
     }
 }
+
+
+//need a packet type of encrypted packet

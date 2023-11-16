@@ -143,9 +143,11 @@ namespace Multiplayer_Games_Programming_Server
                                 playerTwoScore++;
                             }
                             m_Clients[index].Send(new ScorePacket(playerOneScore, playerTwoScore));
-
-
-                            //m_Clients[index].Send(new ScorePacket(playerOneScore, playerTwoScore));
+                            ConnectedClient? receiverClient;
+                            if (m_Clients.TryGetValue(index + 1, out receiverClient))
+                            {
+								receiverClient.Send(new ScorePacket(playerOneScore, playerTwoScore));                                
+                            }
                                                       
 							break;
 
