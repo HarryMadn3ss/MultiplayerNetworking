@@ -100,16 +100,21 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		[JsonPropertyName("Index")]
 		public int m_index { get; set; }
 
+        [JsonPropertyName("Key")]
+        public RSAParameters m_key { get; set; }
+
         public LoginPacket()
         {
             Type = PacketType.LOGINPACKET;
 			m_index = int.MaxValue;
+			m_key = new RSAParameters();
         }
 
-        public LoginPacket(int index)
+        public LoginPacket(int index, RSAParameters key)
         {
             Type = PacketType.LOGINPACKET;
             m_index = index;
+			m_key = key;
         }
 
 
@@ -170,32 +175,33 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		}
     }
 
-  //  [Serializable]
-  //  public class EncryptedPacket : Packet
-  //  {
-		//[JsonPropertyName("Data")]
-		//public byte[] m_encryptedData;
+	[Serializable]
+	public class EncryptedPacket : Packet
+	{
+		[JsonPropertyName("Index")]
+		public int? m_index;
 
-  //      [JsonPropertyName("Index")]
-  //      public int? m_index;
+		[JsonPropertyName("Data")]
+		public byte[] m_encryptedData;	
 
-  //      public EncyrptedPacket()
-  //      {
-		//	Type = PacketType.ENCRYPTEDPACKET;
-  //          m_encryptedData = new byte[0];
-  //      }
+		public EncryptedPacket()
+		{
+			Type = PacketType.ENCRYPTEDPACKET;
+			m_index = int.MaxValue;
+			m_encryptedData = new byte[0];
+		}
 
-		//public EncryptedPacket(int index, byte[] encryptedData)
-		//{
-  //          Type = PacketType.ENCRYPTEDPACKET;
-  //          m_encryptedData = encryptedData;
-		//	m_index = index;
-  //      }
-        
+		public EncryptedPacket(int index, byte[] encryptedData)
+		{
+			Type = PacketType.ENCRYPTEDPACKET;
+			m_encryptedData = encryptedData;
+			m_index = index;
+		}
 
-  //  }
 
-    [Serializable]
+	}
+
+	[Serializable]
 	public class PacketConverter : JsonConverter<Packet> 
 	{
         public override Packet? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -225,11 +231,11 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     {
                         return JsonSerializer.Deserialize<ScorePacket>(root.GetRawText(), options);
                     }
-                    //if (typeProperty.GetByte() == (byte)PacketType.ENCYPTEDPACKET)
-                    //{
-                    //    return JsonSerializer.Deserialize<EncryptedPacket>(root.GetRawText(), options);
-                    //}
-                }
+					if (typeProperty.GetByte() == (byte)PacketType.ENCRYPTEDPACKET)
+					{
+						return JsonSerializer.Deserialize<EncryptedPacket>(root.GetRawText(), options);
+					}
+				}
 			}
 
 				throw new NotImplementedException();

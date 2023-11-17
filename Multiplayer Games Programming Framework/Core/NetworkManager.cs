@@ -12,6 +12,8 @@ using System.Xml.Linq;
 using Multiplayer_Games_Programming_Framework.GameCode.Components;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
+
 
 namespace Multiplayer_Games_Programming_Framework.Core
 {
@@ -46,6 +48,11 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		public int m_playerOneScore;
 		public int m_playerTwoScore;
 
+		//security
+		RSACryptoServiceProvider m_RSAProvider;
+		public RSAParameters m_publicKey; //clients public key
+		RSAParameters m_privateKey; //clients private key
+		RSAParameters m_serverPublicKey;
 		
 		
 
@@ -57,6 +64,10 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		{
 			m_TcpClient = new TcpClient();
 			m_UdpClient = new UdpClient();
+			//keys
+			m_RSAProvider = new RSACryptoServiceProvider(1024); //number denotes how strong the encryption, the higher the number the slower -  this number cannot change between setting the keys
+			m_publicKey = m_RSAProvider.ExportParameters(false); //false sets to public key
+			m_privateKey = m_RSAProvider.ExportParameters(true); //true sets it to private by adding more parameters
 		}
 
 		public bool Connect(string ip, int port)
@@ -118,25 +129,16 @@ namespace Multiplayer_Games_Programming_Framework.Core
 								//update pos of indexed paddle
 								PositionPacket pp = (PositionPacket)packet;
 								if(pp != null)
-								{
-									//update postion
-									//if(m_Controller != null)
-									//{
-									//	m_Controller.UpdatePosition(new Vector2(pp.X, pp.Y));
-									//}
-									
+								{									
 									m_positionUpdate = new Vector2(pp.X, pp.Y);
 								}
 								break;
 
 							case PacketType.LOGINPACKET:
-								//save assigned index
-								//put an if statemnet in the game scene to set the controls for the correct paddle
-								LoginPacket lp = (LoginPacket)packet;
-								//if (lp != null)
-								//{
-									m_index = lp.m_index;
-								//}
+								
+								LoginPacket lp = (LoginPacket)packet;								
+								m_index = lp.m_index;
+								m_serverPublicKey = lp.m_key;
 								
 								break;
                             case PacketType.BALLPACKET:
@@ -167,10 +169,14 @@ namespace Multiplayer_Games_Programming_Framework.Core
 			}
 		}
 
-		public void TCPSendMessage(Packet? packet)
+		public void TCPSendMessage(Packet? packet, bool encrypted = true)
 		{
 			string? packetToSend = packet.Serialize();	
 
+			if(encrypted)
+			{
+				packetToSend = new EncryptedPacket(m_index, EncyrptPacket(packet)).Serialize();
+			}
 
 			m_StreamWriter.WriteLine(packetToSend);					
 			m_StreamWriter.Flush();
@@ -178,10 +184,10 @@ namespace Multiplayer_Games_Programming_Framework.Core
 
 		public void Login()
 		{
-			LoginPacket loginPacket = new LoginPacket(m_index);
+			LoginPacket loginPacket = new LoginPacket(m_index, m_publicKey);
 			//string msgToSend = message.Serialize();
 
-			TCPSendMessage(loginPacket);
+			TCPSendMessage(loginPacket, false);
 		}
 
 		async Task UdpProcessSeverResponse()
@@ -223,6 +229,28 @@ namespace Multiplayer_Games_Programming_Framework.Core
 
 			byte[] bytes = Encoding.UTF8.GetBytes(packetToSend);
 			m_UdpClient.Send(bytes, bytes.Length);
+		}
+
+		public byte[] EncyrptPacket(Packet? packet)
+		{
+			lock(m_RSAProvider)
+			{
+				m_RSAProvider.ImportParameters(m_serverPublicKey); //sets the key to the servers
+				string json = packet.Serialize(); 
+				byte[] encrypted = m_RSAProvider.Encrypt(Encoding.UTF8.GetBytes(json), false); //encrypt into a byte array
+				return encrypted;
+			}
+		}
+
+		public void DecryptPacket(byte[] data)
+		{
+			lock(m_RSAProvider)
+			{
+				m_RSAProvider.ImportParameters(m_privateKey); //sets the parameters to the private key of the client
+				byte[] decyrpted = m_RSAProvider.Decrypt(data, false); //decyrpt the byte array
+				string json = Encoding.UTF8.GetString(decyrpted); //get the string
+				Packet packet = Packet.Deserialize(json);//deserialise into a packet
+			}
 		}
 
 	}

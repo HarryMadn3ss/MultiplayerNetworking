@@ -5,6 +5,7 @@ using Multiplayer_Games_Programming_Packet_Library;
 using System.Linq.Expressions;
 using System.Text;
 using System;
+using System.Security.Cryptography;
 
 namespace Multiplayer_Games_Programming_Server
 {
@@ -19,8 +20,14 @@ namespace Multiplayer_Games_Programming_Server
 
 		ConcurrentDictionary<int, ConnectedClient> m_Clients;
 
+		
+		
+
+
 		public Server(string ipAddress, int port)
 		{
+			
+
 			IPAddress ip = IPAddress.Parse(ipAddress);
 			m_TcpListener = new TcpListener(ip, port);
 			m_UdpListener = new UdpClient(port);
@@ -42,13 +49,13 @@ namespace Multiplayer_Games_Programming_Server
                     Console.WriteLine("Connection Has Been Made");
                     //Console.WriteLine(Thread.CurrentThread.Name);
 					ConnectedClient conClient = new ConnectedClient(index, socket);
-					conClient.Send(new LoginPacket(index));
+					conClient.Login(index);
                     Thread thread = new Thread(() => { ClientMethod(index); });
 					thread.Name = "Player Index: " + index.ToString();
                     m_Clients.GetOrAdd(index, conClient);
 					thread.Start();
-					LoginPacket loginPacket = new LoginPacket(index);
-					conClient.Send(loginPacket);
+					//LoginPacket loginPacket = new LoginPacket(index);
+					//conClient.Send(loginPacket);
 					index++;
 				}
 
@@ -78,87 +85,107 @@ namespace Multiplayer_Games_Programming_Server
 				Packet? packet;
 				while((packet = m_Clients[index].Read()) != null)
 				{
-					switch (packet.Type)
-					{
-						case PacketType.MESSAGEPACKET:
-							MessagePacket mp = (MessagePacket)packet;
-							Console.WriteLine("Recieved Message: " + mp.m_message);
-							m_Clients[index].Send(new MessagePacket("Logged In!"));							
-							break;
+					if (packet == null) continue;
 
-						case PacketType.POSITIONPACKET:
-							PositionPacket pp = (PositionPacket)packet;
-							//Console.WriteLine($"postision: Index: {pp.Index} X:{pp.X} Y:{pp.Y}");
-							if(index == 0)
-							{
-								ConnectedClient? receiver;
-								if (m_Clients.TryGetValue(index + 1, out receiver))
-								{
-									receiver.Send(new PositionPacket(pp.Index, pp.X, pp.Y));
-								}
-                            }
-							else
-							{
-								ConnectedClient? receiver;
-								if(m_Clients.TryGetValue((index - 1), out receiver))
-								{
-									m_Clients[index - 1].Send(new PositionPacket(pp.Index, pp.X, pp.Y));
-								}
-
-							}
-							break;
-
-						case PacketType.LOGINPACKET:
-							LoginPacket lp = (LoginPacket)packet;							
-							m_Clients[index].Send(new LoginPacket(index));
-							break;
-
-                        case PacketType.BALLPACKET:
-                            BallPacket bp = (BallPacket)packet;                            
-                            if (index == 0)
-                            {
-                                ConnectedClient? receiver;
-                                if (m_Clients.TryGetValue(index + 1, out receiver))
-                                {
-                                    receiver.Send(new BallPacket(bp.X, bp.Y));
-                                }
-                            }
-                            else
-                            {
-                                ConnectedClient? receiver;
-                                if (m_Clients.TryGetValue((index - 1), out receiver))
-                                {
-                                    m_Clients[index - 1].Send(new BallPacket(bp.X, bp.Y));
-                                }
-
-                            }
-                            break;
-						case PacketType.SCOREPACKET:
-							ScorePacket sp = (ScorePacket)packet;
-                            if (sp.m_index == 1)
-                            {
-                                playerOneScore++;
-                            }
-                            else if (sp.m_index == 0)
-                            {
-                                playerTwoScore++;
-                            }
-                            m_Clients[index].Send(new ScorePacket(playerOneScore, playerTwoScore));
-                            ConnectedClient? receiverClient;
-                            if (m_Clients.TryGetValue(index + 1, out receiverClient))
-                            {
-								receiverClient.Send(new ScorePacket(playerOneScore, playerTwoScore));                                
-                            }
-                                                      
-							break;
-
-						default: break;
-                    }
+					HandleTCPPacket(index, packet);
 				}
 			}
 			catch(Exception ex)
 			{
 				Console.WriteLine("Error" + ex.Message);
+			}
+		}
+
+		private void HandleTCPPacket(int index, Packet packet)
+		{
+			try
+			{
+                switch (packet.Type)
+                {
+					case PacketType.ENCRYPTEDPACKET:
+						EncryptedPacket encryptedPacket = (EncryptedPacket)packet;
+						Packet? decryptedPacket = m_Clients[index].DecyrptPacket(encryptedPacket.m_encryptedData);
+
+						if (decryptedPacket == null) return;
+
+						HandleTCPPacket(index, decryptedPacket);
+
+						break;
+                    case PacketType.MESSAGEPACKET:
+                        MessagePacket mp = (MessagePacket)packet;
+                        Console.WriteLine("Recieved Message: " + mp.m_message);
+                        m_Clients[index].Send(index, new MessagePacket("Logged In!"));
+                        break;
+                    case PacketType.POSITIONPACKET:
+                        PositionPacket pp = (PositionPacket)packet;
+                        //Console.WriteLine($"postision: Index: {pp.Index} X:{pp.X} Y:{pp.Y}");
+                        if (index == 0)
+                        {
+                            ConnectedClient? receiver;
+                            if (m_Clients.TryGetValue(index + 1, out receiver))
+                            {
+                                receiver.Send(index, new PositionPacket(pp.Index, pp.X, pp.Y), false);
+                            }
+                        }
+                        else
+                        {
+                            ConnectedClient? receiver;
+                            if (m_Clients.TryGetValue((index - 1), out receiver))
+                            {
+                                m_Clients[index - 1].Send(index, new PositionPacket(pp.Index, pp.X, pp.Y), false);
+                            }
+                        }
+                        break;
+                    case PacketType.LOGINPACKET:
+                        LoginPacket lp = (LoginPacket)packet;
+						//m_Clients[index].Send(new LoginPacket(index, m_publicKey));
+						m_Clients[lp.m_index].AssignKey(lp.m_key);
+                        //AssignKey(lp.m_index, lp.m_key);
+                        break;
+
+                    case PacketType.BALLPACKET:
+                        BallPacket bp = (BallPacket)packet;
+                        if (index == 0)
+                        {
+                            ConnectedClient? receiver;
+                            if (m_Clients.TryGetValue(index + 1, out receiver))
+                            {
+                                receiver.Send(index, new BallPacket(bp.X, bp.Y));
+                            }
+                        }
+                        else
+                        {
+                            ConnectedClient? receiver;
+                            if (m_Clients.TryGetValue((index - 1), out receiver))
+                            {
+                                m_Clients[index - 1].Send(index, new BallPacket(bp.X, bp.Y));
+                            }
+
+                        }
+                        break;
+                    case PacketType.SCOREPACKET:
+                        ScorePacket sp = (ScorePacket)packet;
+                        if (sp.m_index == 1)
+                        {
+                            playerOneScore++;
+                        }
+                        else if (sp.m_index == 0)
+                        {
+                            playerTwoScore++;
+                        }
+                        m_Clients[index].Send(index, new ScorePacket(playerOneScore, playerTwoScore));
+                        ConnectedClient? receiverClient;
+                        if (m_Clients.TryGetValue(index + 1, out receiverClient))
+                        {
+                            receiverClient.Send(index, new ScorePacket(playerOneScore, playerTwoScore));
+                        }
+                        break;
+                    default: break;
+                } 
+            }
+			catch (Exception ex)
+			{
+				Console.WriteLine("Error *HandleTcp* " + ex.Message);
 			}
 		}
 
@@ -210,5 +237,10 @@ namespace Multiplayer_Games_Programming_Server
 
 			}
 		}
+
+		
+
+		
+
 	}
 }
