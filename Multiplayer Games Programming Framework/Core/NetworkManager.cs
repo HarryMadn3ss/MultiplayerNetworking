@@ -13,6 +13,7 @@ using Multiplayer_Games_Programming_Framework.GameCode.Components;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using System.Reflection;
 
 
 namespace Multiplayer_Games_Programming_Framework.Core
@@ -114,52 +115,7 @@ namespace Multiplayer_Games_Programming_Framework.Core
 
 					if (packet != null)
 					{
-						switch (packet.Type)
-						{
-							case PacketType.MESSAGEPACKET:
-								//read msg and print to debug
-								MessagePacket mp = (MessagePacket)packet;
-								if (mp != null)
-								{
-									Debug.WriteLine($"Message: {mp.m_message}");
-								}
-								break;
-
-							case PacketType.POSITIONPACKET:
-								//update pos of indexed paddle
-								PositionPacket pp = (PositionPacket)packet;
-								if(pp != null)
-								{									
-									m_positionUpdate = new Vector2(pp.X, pp.Y);
-								}
-								break;
-
-							case PacketType.LOGINPACKET:
-								
-								LoginPacket lp = (LoginPacket)packet;								
-								m_index = lp.m_index;
-								m_serverPublicKey = lp.m_key;
-								
-								break;
-                            case PacketType.BALLPACKET:
-                                //update pos of indexed paddle
-                                BallPacket bp = (BallPacket)packet;
-                                if (bp != null)
-                                {
-                                    m_ballPositionUpdate = new Vector2(bp.X, bp.Y);
-                                }
-                                break;
-
-							case PacketType.SCOREPACKET:
-								ScorePacket sp = (ScorePacket)packet;
-								m_playerOneScore = sp.m_playerOneScore;
-								m_playerTwoScore = sp.m_playerTwoScore;
-								break;
-
-                            default:
-								Debug.WriteLine($"Packet type invaild: NM! {packet.Type}");
-								break;
-						}
+						HandleTCPPacket(packet);
 					}
 				}
 			}
@@ -168,6 +124,65 @@ namespace Multiplayer_Games_Programming_Framework.Core
 				Debug.WriteLine(ex.Message);
 			}
 		}
+
+		private void HandleTCPPacket(Packet packet)
+		{
+            switch (packet.Type)
+            {
+                case PacketType.ENCRYPTEDPACKET:
+                    EncryptedPacket encryptedPacket = (EncryptedPacket)packet;
+					Packet? decryptedPacket = DecryptPacket(encryptedPacket.m_encryptedData);
+
+                    if (decryptedPacket == null) return;
+
+                    HandleTCPPacket(decryptedPacket);
+
+                    break;
+                case PacketType.MESSAGEPACKET:
+                    //read msg and print to debug
+                    MessagePacket mp = (MessagePacket)packet;
+                    if (mp != null)
+                    {
+                        Debug.WriteLine($"Message: {mp.m_message}");
+                    }
+                    break;
+
+                case PacketType.POSITIONPACKET:
+                    //update pos of indexed paddle
+                    PositionPacket pp = (PositionPacket)packet;
+                    if (pp != null)
+                    {
+                        m_positionUpdate = new Vector2(pp.X, pp.Y);
+                    }
+                    break;
+
+                case PacketType.LOGINPACKET:
+
+                    LoginPacket lp = (LoginPacket)packet;
+                    m_index = lp.m_index;
+                    m_serverPublicKey = lp.m_key;
+
+                    break;
+                case PacketType.BALLPACKET:
+                    //update pos of indexed paddle
+                    BallPacket bp = (BallPacket)packet;
+                    if (bp != null)
+                    {
+                        m_ballPositionUpdate = new Vector2(bp.X, bp.Y);
+                    }
+                    break;
+
+                case PacketType.SCOREPACKET:
+                    ScorePacket sp = (ScorePacket)packet;
+                    m_playerOneScore = sp.m_playerOneScore;
+                    m_playerTwoScore = sp.m_playerTwoScore;
+                    break;
+
+                default:
+                    Debug.WriteLine($"Packet type invaild: NM! {packet.Type}");
+                    break;
+            }
+        }
 
 		public void TCPSendMessage(Packet? packet, bool encrypted = true)
 		{
@@ -242,7 +257,7 @@ namespace Multiplayer_Games_Programming_Framework.Core
 			}
 		}
 
-		public void DecryptPacket(byte[] data)
+		public Packet DecryptPacket(byte[] data)
 		{
 			lock(m_RSAProvider)
 			{
@@ -250,6 +265,7 @@ namespace Multiplayer_Games_Programming_Framework.Core
 				byte[] decyrpted = m_RSAProvider.Decrypt(data, false); //decyrpt the byte array
 				string json = Encoding.UTF8.GetString(decyrpted); //get the string
 				Packet packet = Packet.Deserialize(json);//deserialise into a packet
+				return packet;
 			}
 		}
 

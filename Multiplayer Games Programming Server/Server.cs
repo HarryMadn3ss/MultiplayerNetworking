@@ -124,7 +124,7 @@ namespace Multiplayer_Games_Programming_Server
                             ConnectedClient? receiver;
                             if (m_Clients.TryGetValue(index + 1, out receiver))
                             {
-                                receiver.Send(index, new PositionPacket(pp.Index, pp.X, pp.Y), false);
+                                receiver.Send(index, new PositionPacket(pp.Index, pp.X, pp.Y));
                             }
                         }
                         else
@@ -132,14 +132,14 @@ namespace Multiplayer_Games_Programming_Server
                             ConnectedClient? receiver;
                             if (m_Clients.TryGetValue((index - 1), out receiver))
                             {
-                                m_Clients[index - 1].Send(index, new PositionPacket(pp.Index, pp.X, pp.Y), false);
+                                m_Clients[index - 1].Send(index, new PositionPacket(pp.Index, pp.X, pp.Y));
                             }
                         }
                         break;
                     case PacketType.LOGINPACKET:
                         LoginPacket lp = (LoginPacket)packet;
 						//m_Clients[index].Send(new LoginPacket(index, m_publicKey));
-						m_Clients[lp.m_index].AssignKey(lp.m_key);
+						m_Clients[index].AssignKey(lp.m_key);
                         //AssignKey(lp.m_index, lp.m_key);
                         break;
 
