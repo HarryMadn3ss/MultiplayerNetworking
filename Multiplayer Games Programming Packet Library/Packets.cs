@@ -109,6 +109,12 @@ namespace Multiplayer_Games_Programming_Packet_Library
 			m_index = int.MaxValue;
 			m_key = new RSAParameters();
         }
+        public LoginPacket(int index)
+        {
+            Type = PacketType.LOGINPACKET;
+            m_index = index;
+           
+        }
 
         public LoginPacket(int index, RSAParameters key)
         {

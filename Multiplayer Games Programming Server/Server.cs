@@ -55,7 +55,7 @@ namespace Multiplayer_Games_Programming_Server
                     m_Clients.GetOrAdd(index, conClient);
 					thread.Start();
 					//LoginPacket loginPacket = new LoginPacket(index);
-					//conClient.Send(loginPacket);
+					//conClient.Send(index, loginPacket, false);
 					index++;
 				}
 
@@ -132,7 +132,7 @@ namespace Multiplayer_Games_Programming_Server
                             ConnectedClient? receiver;
                             if (m_Clients.TryGetValue((index - 1), out receiver))
                             {
-                                m_Clients[index - 1].Send(index, new PositionPacket(pp.Index, pp.X, pp.Y));
+                                receiver.Send(index, new PositionPacket(pp.Index, pp.X, pp.Y));
                             }
                         }
                         break;
