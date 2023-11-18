@@ -22,7 +22,6 @@ namespace Multiplayer_Games_Programming_Server
 
         public ConnectedClient(int index, Socket socket)
 		{
-
             m_rsaProvider = new RSACryptoServiceProvider(1024); //must match the clients key size
             m_publicKey = m_rsaProvider.ExportParameters(false);
             m_privateKey = m_rsaProvider.ExportParameters(true);
@@ -30,9 +29,7 @@ namespace Multiplayer_Games_Programming_Server
 
             m_Stream = new NetworkStream(socket, false);
             m_StreamReader = new StreamReader(m_Stream, Encoding.UTF8);
-            m_StreamWriter = new StreamWriter(m_Stream, Encoding.UTF8);          
-           
-            
+            m_StreamWriter = new StreamWriter(m_Stream, Encoding.UTF8);            
         }
 
 		public void Close()

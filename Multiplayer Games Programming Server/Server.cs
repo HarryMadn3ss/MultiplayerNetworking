@@ -20,14 +20,8 @@ namespace Multiplayer_Games_Programming_Server
 
 		ConcurrentDictionary<int, ConnectedClient> m_Clients;
 
-		
-		
-
-
 		public Server(string ipAddress, int port)
 		{
-			
-
 			IPAddress ip = IPAddress.Parse(ipAddress);
 			m_TcpListener = new TcpListener(ip, port);
 			m_UdpListener = new UdpClient(port);
@@ -50,9 +44,9 @@ namespace Multiplayer_Games_Programming_Server
                     //Console.WriteLine(Thread.CurrentThread.Name);
 					ConnectedClient conClient = new ConnectedClient(index, socket);
 					conClient.Login(index);
+                    m_Clients.GetOrAdd(index, conClient);
                     Thread thread = new Thread(() => { ClientMethod(index); });
 					thread.Name = "Player Index: " + index.ToString();
-                    m_Clients.GetOrAdd(index, conClient);
 					thread.Start();
 					//LoginPacket loginPacket = new LoginPacket(index);
 					//conClient.Send(index, loginPacket, false);
