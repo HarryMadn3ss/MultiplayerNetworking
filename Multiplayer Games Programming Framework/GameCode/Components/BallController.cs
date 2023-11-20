@@ -10,7 +10,7 @@ namespace Multiplayer_Games_Programming_Framework
 {
 	internal class BallControllerComponent : Component
 	{
-		float m_Speed;
+		float m_Speed;		
 		Vector2 m_InitDirection;
 		Rigidbody m_Rigidbody;
 		public BallControllerComponent(GameObject gameObject) : base(gameObject)
@@ -42,7 +42,6 @@ namespace Multiplayer_Games_Programming_Framework
         public void UpdatePosition(Vector2 pos)
         {
             m_Rigidbody.UpdatePosition(pos);
-
         }
 
         protected override void Update(float deltaTime)

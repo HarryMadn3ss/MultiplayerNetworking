@@ -17,8 +17,7 @@ namespace Multiplayer_Games_Programming_Framework
 
 		SpriteBatch m_spriteBatch;
 		SpriteFont m_font;
-		
-		
+				
 
 		BallGO m_Ball;
 		PaddleGO m_PlayerPaddle;

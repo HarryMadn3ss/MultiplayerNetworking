@@ -24,8 +24,8 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components
             if (NetworkManager.m_Instance.m_index == 0)
             {
                 ScorePacket _scorePacket = new ScorePacket(1);
-                //NetworkManager.m_Instance.UdpSendMessage(_scorePacket);
-                NetworkManager.m_Instance.TCPSendMessage(_scorePacket);
+                NetworkManager.m_Instance.UdpSendMessage(_scorePacket);
+                //NetworkManager.m_Instance.TCPSendMessage(_scorePacket);
             }
         }
     }

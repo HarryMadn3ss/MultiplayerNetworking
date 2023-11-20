@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System;
 using System.Security.Cryptography;
+using System.Reflection;
 
 namespace Multiplayer_Games_Programming_Server
 {
@@ -163,20 +164,23 @@ namespace Multiplayer_Games_Programming_Server
                         break;
                     case PacketType.SCOREPACKET:
                         ScorePacket sp = (ScorePacket)packet;
-                        if (sp.m_index == 1)
-                        {
-                            playerOneScore++;
-                        }
-                        else if (sp.m_index == 0)
-                        {
-                            playerTwoScore++;
-                        }
-                        m_Clients[index].Send(index, new ScorePacket(playerOneScore, playerTwoScore));
-                        ConnectedClient? receiverClient;
-                        if (m_Clients.TryGetValue(index + 1, out receiverClient))
-                        {
-                            receiverClient.Send(index, new ScorePacket(playerOneScore, playerTwoScore));
-                        }
+						lock(sp)
+						{
+							if (sp.m_index == 1)
+							{
+							    playerOneScore++;
+							}
+							else if (sp.m_index == 0)
+							{
+							    playerTwoScore++;
+							}
+							m_Clients[index].Send(index, new ScorePacket(playerOneScore, playerTwoScore));
+							ConnectedClient? receiverClient;
+							if (m_Clients.TryGetValue(index + 1, out receiverClient))
+							{
+							    receiverClient.Send(index, new ScorePacket(playerOneScore, playerTwoScore));
+							}
+						}                       
                         break;
                     default: break;
                 } 
@@ -199,55 +203,50 @@ namespace Multiplayer_Games_Programming_Server
 
 				Packet? packetToRead = Packet.Deserialize(message);
 
-				byte[] bytes = Encoding.UTF8.GetBytes("Hello");
+				switch (packetToRead.Type)
+				{
+					case PacketType.MESSAGEPACKET:
+						MessagePacket mp = (MessagePacket)packetToRead;
+						Console.WriteLine("UDP msg Recieved: " + mp.m_message);
+						break;
+                    case PacketType.SCOREPACKET:
+                        ScorePacket sp = (ScorePacket)packetToRead;
+                        if (sp.m_index == 1)
+                        {
+                            playerOneScore++;
+                        }
+                        else if (sp.m_index == 0)
+                        {
+                            playerTwoScore++;
+                        }
+						//send async to oposite client
+						SendUDP(new ScorePacket(playerOneScore, playerTwoScore));
 
-				m_UdpListener.SendAsync(bytes, bytes.Length, receiveResult.RemoteEndPoint);
-				//switch (packet.Type)
-				//{
-				//	//case PacketType.SCOREPACKET:
-				//	//	ScorePacket sp = (ScorePacket)packet;
-				//	//	if (sp.m_index == 1)
-				//	//	{
-				//	//		playerOneScore++;
-				//	//	}
-				//	//	else if (sp.m_index == 0)
-				//	//	{
-				//	//		playerTwoScore++;
-				//	//	}
-				//	//	byte[] bytes = Encoding.UTF8.GetBytes(new ScorePacket(playerOneScore, playerTwoScore));
+                        //m_UdpListener.SendAsync(bytes, bytes.Length, receiveResult.RemoteEndPoint);
 
-				//	//	m_UdpListener.SendAsync(bytes, bytes.Length, receiveResult.RemoteEndPoint);
-
-				//	//	m_Clients[index].Send(new ScorePacket(playerOneScore, playerTwoScore));
-				//	//	ConnectedClient? receiverClient;
-				//	//	if (m_Clients.TryGetValue(index + 1, out receiverClient))
-				//	//	{
-				//	//		receiverClient.Send(new ScorePacket(playerOneScore, playerTwoScore));
-				//	//	}
-
-				//	//	break;
-
-				//	case PacketType.MESSAGEPACKET:
-    //                    MessagePacket mp = (MessagePacket)packet;
-    //                    Console.WriteLine("Recieved Message: " + mp.m_message);
-    //                    m_Clients[index].Send(index, new MessagePacket("Logged In!"));
-    //                    break;
-
-				//	default: break;
-				//}
+                        //m_Clients[index].Send(index, new ScorePacket(playerOneScore, playerTwoScore));
+                        //ConnectedClient? receiverClient;
+                        //if (m_Clients.TryGetValue(index + 1, out receiverClient))
+                        //{
+                        //    receiverClient.Send(index, new ScorePacket(playerOneScore, playerTwoScore));
+                        //}
+                        break;
 
 
-				//Console.WriteLine("UDP msg Received: " + message);
+                }
 
-				//byte[] bytes = Encoding.UTF8.GetBytes("Hello");
 
+				
 
 			}
 		}
 
-		
 
-		
-
-	}
+        public void SendUDP(Packet packet)
+        {
+			string packetToSend = packet.Serialize();
+            byte[] bytes = Encoding.UTF8.GetBytes(packetToSend);
+			m_UdpListener.SendAsync(bytes, bytes.Length);
+        }		
+    }
 }
