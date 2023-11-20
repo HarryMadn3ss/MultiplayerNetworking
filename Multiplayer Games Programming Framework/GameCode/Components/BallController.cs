@@ -55,7 +55,7 @@ namespace Multiplayer_Games_Programming_Framework
 			if(NetworkManager.m_Instance.m_index == 0)
 			{
 				BallPacket packet = new BallPacket(this.m_Transform.Position.X, this.m_Transform.Position.Y);
-				NetworkManager.m_Instance.TCPSendMessage(packet);
+				NetworkManager.m_Instance.TCPSendMessage(packet, false);
 			}
 
             base.Update(deltaTime);

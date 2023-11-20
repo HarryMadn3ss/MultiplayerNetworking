@@ -159,7 +159,7 @@ namespace Multiplayer_Games_Programming_Framework.Core
                 case PacketType.LOGINPACKET:
 
                     LoginPacket lp = (LoginPacket)packet;
-                    m_index = lp.m_index;
+                    m_index = lp.m_index;					
                     m_serverPublicKey = lp.m_key;
 
                     break;
