@@ -43,12 +43,13 @@ namespace Multiplayer_Games_Programming_Server
                     Console.WriteLine("Connection Has Been Made");
                     //Console.WriteLine(Thread.CurrentThread.Name);
 					ConnectedClient conClient = new ConnectedClient(index, socket);
-					conClient.Login(index);
+                    //conClient.Login(index);
                     m_Clients.GetOrAdd(index, conClient);
                     Thread thread = new Thread(() => { ClientMethod(index); });
 					thread.Name = "Player Index: " + index.ToString();
 					thread.Start();
 					//LoginPacket loginPacket = new LoginPacket(index);
+                    conClient.Send(index, new LoginPacket(index), false);
 					//conClient.Send(index, loginPacket, false);
 					index++;
 				}
@@ -60,7 +61,9 @@ namespace Multiplayer_Games_Programming_Server
 			catch(Exception ex) //if not catch the error
 			{
 				Console.WriteLine(ex.Message);
+				throw;
 			}
+			
 		}
 
 		public void Stop()
@@ -87,6 +90,7 @@ namespace Multiplayer_Games_Programming_Server
 			catch(Exception ex)
 			{
 				Console.WriteLine("Error" + ex.Message);
+				throw;
 			}
 		}
 
@@ -180,6 +184,7 @@ namespace Multiplayer_Games_Programming_Server
 			catch (Exception ex)
 			{
 				Console.WriteLine("Error *HandleTcp* " + ex.Message);
+				throw;
 			}
 		}
 
