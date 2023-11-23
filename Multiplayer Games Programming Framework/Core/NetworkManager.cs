@@ -94,12 +94,13 @@ namespace Multiplayer_Games_Programming_Framework.Core
 
 		public void Run()
 		{
+            UdpProcessSeverResponse();
+			
 			//listen to the serverTcpClient
 			Thread TcpThread = new Thread(new ThreadStart(TcpProcessServerResponse));
 			TcpThread.Name = "TCP Thread";
 			TcpThread.Start();
 									
-            UdpProcessSeverResponse();		
 		}
 
 		private void TcpProcessServerResponse()
@@ -200,9 +201,10 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		public void Login()
 		{
 			LoginPacket loginPacket = new LoginPacket(m_index, m_publicKey);
-			//string msgToSend = message.Serialize();
+            MessagePacket messagePacket = new MessagePacket("Client " + m_index + " - login Attempt");
 
-			TCPSendMessage(loginPacket, false);
+			UdpSendMessage(messagePacket);
+            TCPSendMessage(loginPacket, false);
 		}
 
 		async Task UdpProcessSeverResponse()
@@ -219,11 +221,10 @@ namespace Multiplayer_Games_Programming_Framework.Core
 
                     switch (packet.Type)
 					{
-						case PacketType.SCOREPACKET:
-                        ScorePacket sp = (ScorePacket)packet;
-                        m_playerOneScore = sp.m_playerOneScore;
-                        m_playerTwoScore = sp.m_playerTwoScore;
-                        break;
+						case PacketType.MESSAGEPACKET:
+                            MessagePacket mp = (MessagePacket)packet;
+                            Debug.WriteLine("UDP msg Recieved: " + mp.m_message);
+                            break;
 
 						default: break;
 					}

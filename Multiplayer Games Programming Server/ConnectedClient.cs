@@ -65,9 +65,9 @@ namespace Multiplayer_Games_Programming_Server
         public void Login(int index)
         {
             LoginPacket loginPacket = new LoginPacket(index, m_publicKey);
-            //string msgToSend = message.Serialize();
 
             Send(index, loginPacket, false);
+            
         }
 
         public byte[] EncryptPacket(int index, Packet? packet)

@@ -192,7 +192,7 @@ namespace Multiplayer_Games_Programming_Server
 			}
 		}
 
-		async Task UDPListen(/*int index, Packet packet*/)
+		async Task UDPListen()
 		{
 			while(true)
 			{
@@ -208,45 +208,20 @@ namespace Multiplayer_Games_Programming_Server
 					case PacketType.MESSAGEPACKET:
 						MessagePacket mp = (MessagePacket)packetToRead;
 						Console.WriteLine("UDP msg Recieved: " + mp.m_message);
+						MessagePacket sendResponse = new MessagePacket("Message has been Recieved");
+						SendUDP(sendResponse, receiveResult);
 						break;
-                    case PacketType.SCOREPACKET:
-                        ScorePacket sp = (ScorePacket)packetToRead;
-                        if (sp.m_index == 1)
-                        {
-                            playerOneScore++;
-                        }
-                        else if (sp.m_index == 0)
-                        {
-                            playerTwoScore++;
-                        }
-						//send async to oposite client
-						SendUDP(new ScorePacket(playerOneScore, playerTwoScore));
-
-                        //m_UdpListener.SendAsync(bytes, bytes.Length, receiveResult.RemoteEndPoint);
-
-                        //m_Clients[index].Send(index, new ScorePacket(playerOneScore, playerTwoScore));
-                        //ConnectedClient? receiverClient;
-                        //if (m_Clients.TryGetValue(index + 1, out receiverClient))
-                        //{
-                        //    receiverClient.Send(index, new ScorePacket(playerOneScore, playerTwoScore));
-                        //}
+					default:
                         break;
-
-
                 }
-
-
-				
-
 			}
 		}
 
-
-        public void SendUDP(Packet packet)
+        public void SendUDP(Packet packet, UdpReceiveResult receiveResult)
         {
 			string packetToSend = packet.Serialize();
             byte[] bytes = Encoding.UTF8.GetBytes(packetToSend);
-			m_UdpListener.SendAsync(bytes, bytes.Length);
+			m_UdpListener.SendAsync(bytes, bytes.Length, receiveResult.RemoteEndPoint);
         }		
     }
 }
