@@ -208,7 +208,8 @@ namespace Multiplayer_Games_Programming_Server
 					case PacketType.MESSAGEPACKET:
 						MessagePacket mp = (MessagePacket)packetToRead;
 						Console.WriteLine("UDP msg Recieved: " + mp.m_message);
-						MessagePacket sendResponse = new MessagePacket("Message has been Recieved");
+						m_Clients[index].SetUDPAddress(receiveResult);
+						MessagePacket sendResponse = new MessagePacket("Message has been Recieved: Address Saved");
 						SendUDP(sendResponse, receiveResult);
 						break;
 					default:

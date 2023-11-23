@@ -20,6 +20,9 @@ namespace Multiplayer_Games_Programming_Server
         RSAParameters m_privateKey;
         RSAParameters m_clientKey;
 
+        //UDP address
+        UdpReceiveResult _UDPAddress;
+
         public ConnectedClient(int index, Socket socket)
 		{
             m_rsaProvider = new RSACryptoServiceProvider(1024); //must match the clients key size
@@ -96,6 +99,11 @@ namespace Multiplayer_Games_Programming_Server
         public void AssignKey(RSAParameters key)
         {
             m_clientKey = key;
+        }
+
+        public void SetUDPAddress(UdpReceiveResult receiveResult)
+        {
+            _UDPAddress = receiveResult;
         }
     }
 }
