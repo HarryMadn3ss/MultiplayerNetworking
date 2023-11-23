@@ -112,8 +112,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public LoginPacket(int index)
         {
             Type = PacketType.LOGINPACKET;
-            m_index = index;
-           
+            m_index = index;           
         }
 
         public LoginPacket(int index, RSAParameters key)

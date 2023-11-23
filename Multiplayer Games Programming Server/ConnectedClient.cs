@@ -105,5 +105,7 @@ namespace Multiplayer_Games_Programming_Server
         {
             _UDPAddress = receiveResult;
         }
+
+        public UdpReceiveResult GetUDPAddress() { return _UDPAddress; }
     }
 }

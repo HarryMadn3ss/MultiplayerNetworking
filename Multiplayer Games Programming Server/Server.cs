@@ -207,11 +207,16 @@ namespace Multiplayer_Games_Programming_Server
 				{
 					case PacketType.MESSAGEPACKET:
 						MessagePacket mp = (MessagePacket)packetToRead;
-						Console.WriteLine("UDP msg Recieved: " + mp.m_message);
-						m_Clients[index].SetUDPAddress(receiveResult);
-						MessagePacket sendResponse = new MessagePacket("Message has been Recieved: Address Saved");
+						Console.WriteLine("UDP msg Recieved: " + mp.m_message);						
+						MessagePacket sendResponse = new MessagePacket("Message has been Recieved");
 						SendUDP(sendResponse, receiveResult);
 						break;
+					case PacketType.LOGINPACKET:
+						LoginPacket lp = (LoginPacket)packetToRead;                        
+                        m_Clients[lp.m_index].SetUDPAddress(receiveResult);
+                        MessagePacket sendLoginResponse = new MessagePacket("Message has been Recieved: Address Saved");
+                        SendUDP(sendLoginResponse, m_Clients[lp.m_index].GetUDPAddress());
+                        break;
 					default:
                         break;
                 }

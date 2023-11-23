@@ -163,6 +163,8 @@ namespace Multiplayer_Games_Programming_Framework.Core
                     m_index = lp.m_index;					
                     m_serverPublicKey = lp.m_key;
 
+					LoginPacket UdpLogin = new LoginPacket(m_index);
+					UdpSendMessage(UdpLogin);
                     break;
                 case PacketType.BALLPACKET:
                     //update pos of indexed paddle
@@ -201,9 +203,9 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		public void Login()
 		{
 			LoginPacket loginPacket = new LoginPacket(m_index, m_publicKey);
-            MessagePacket messagePacket = new MessagePacket("Client " + m_index + " - login Attempt");
+            //MessagePacket messagePacket = new MessagePacket("Client " + m_index + " - login Attempt");
 
-			UdpSendMessage(messagePacket);
+			//UdpSendMessage(messagePacket);
             TCPSendMessage(loginPacket, false);
 		}
 

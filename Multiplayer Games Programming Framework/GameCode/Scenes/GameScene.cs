@@ -31,6 +31,15 @@ namespace Multiplayer_Games_Programming_Framework
 
 		float m_GameTimer;
 
+		enum WinnerState
+		{
+			PLAYERONE,
+			PLAYERTWO,
+			DRAW,
+		}
+
+		WinnerState m_winningPlayer;
+
 		public GameScene(SceneManager manager) : base(manager)
 		{
 			m_GameModeState = GameModeState.AWAKE;
@@ -149,11 +158,29 @@ namespace Multiplayer_Games_Programming_Framework
 
 				case GameModeState.PLAYING:
 
-					if(m_GameTimer > 60)
+					//if(m_GameTimer > 60)
+					//{
+					//	//m_Ball.Destroy();						
+					//	m_GameModeState = GameModeState.ENDING;
+					//}
+					if(NetworkManager.m_Instance.m_playerOneScore > 1)
 					{
-						//m_Ball.Destroy();						
-						m_GameModeState = GameModeState.ENDING;
-					}
+						//player one wins
+						m_winningPlayer = WinnerState.PLAYERONE;
+                        m_GameModeState = GameModeState.ENDING;
+                    }
+					else if(NetworkManager.m_Instance.m_playerTwoScore >  7)
+					{
+                        //player two wins
+                        m_winningPlayer = WinnerState.PLAYERTWO;
+                        m_GameModeState = GameModeState.ENDING;
+                    }
+					else
+					{
+                        //draw
+                        m_winningPlayer = WinnerState.DRAW;
+                        m_GameModeState = GameModeState.ENDING;
+                    }
 
 					break;
 
@@ -171,7 +198,23 @@ namespace Multiplayer_Games_Programming_Framework
 			base.Draw(deltaTime);			
 			m_spriteBatch.DrawString(m_font, "Player One: " + NetworkManager.m_Instance.m_playerOneScore, new Vector2(100, 10), Color.CornflowerBlue, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
 			m_spriteBatch.DrawString(m_font, "Player Two: " + NetworkManager.m_Instance.m_playerTwoScore, new Vector2(400, 10), Color.CornflowerBlue, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
-			
+			switch(m_winningPlayer)
+			{
+				case WinnerState.PLAYERONE:
+                    m_spriteBatch.DrawString(m_font, "Player One Wins!!!", new Vector2(0, 0), Color.White, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
+
+                    break;
+				case WinnerState.PLAYERTWO:
+                    m_spriteBatch.DrawString(m_font, "Player Two Wins!!!", new Vector2(0, 0), Color.White, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
+
+                    break;
+				case WinnerState.DRAW:
+                    m_spriteBatch.DrawString(m_font, "Draw", new Vector2(0, 0), Color.White, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
+                    break;
+
+				default:
+					break;
+			}
 		}
 	}
 }
