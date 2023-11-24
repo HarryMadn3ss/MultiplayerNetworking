@@ -13,6 +13,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		BALLPACKET,
 		SCOREPACKET,
         ENCRYPTEDPACKET,
+		GAMESTATEPACKET,
 	}
 
 	[Serializable]
@@ -202,11 +203,33 @@ namespace Multiplayer_Games_Programming_Packet_Library
 			m_encryptedData = encryptedData;
 			m_index = index;
 		}
-
-
 	}
 
-	[Serializable]
+    [Serializable]
+    public class GameStatePacket : Packet
+    {
+        [JsonPropertyName("Index")]
+        public int? m_index;
+
+        [JsonPropertyName("Data")]
+        public int m_gameState;
+
+        public GameStatePacket()
+        {
+            Type = PacketType.GAMESTATEPACKET;
+            m_index = int.MaxValue;
+            m_gameState = int.MaxValue;
+        }
+
+        public GameStatePacket(int index, int gameState)
+        {
+            Type = PacketType.GAMESTATEPACKET;
+            m_gameState = gameState;
+            m_index = index;
+        }
+    }
+
+    [Serializable]
 	public class PacketConverter : JsonConverter<Packet> 
 	{
         public override Packet? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -240,7 +263,11 @@ namespace Multiplayer_Games_Programming_Packet_Library
 					{
 						return JsonSerializer.Deserialize<EncryptedPacket>(root.GetRawText(), options);
 					}
-				}
+                    if (typeProperty.GetByte() == (byte)PacketType.GAMESTATEPACKET)
+                    {
+                        return JsonSerializer.Deserialize<GameStatePacket>(root.GetRawText(), options);
+                    }
+                }
 			}
 
 				throw new NotImplementedException();

@@ -10,7 +10,7 @@ using System.Diagnostics;
 namespace Multiplayer_Games_Programming_Framework
 {
 	internal class PaddleController : Component
-	{
+	{		
 		float m_Speed;
 		Rigidbody m_Rigidbody;
 		int m_index;
@@ -38,9 +38,7 @@ namespace Multiplayer_Games_Programming_Framework
 			PositionPacket packet = new PositionPacket(m_index, this.m_Transform.Position.X, this.m_Transform.Position.Y);
 			NetworkManager.m_Instance.TCPSendMessage(packet, false);
 
-			Debug.WriteLine($"Pos of Player: {packet.Index} {packet.X} {packet.Y}");
-
-			
+			Debug.WriteLine($"Pos of Player: {packet.Index} {packet.X} {packet.Y}");			
 		}
 	}
 }

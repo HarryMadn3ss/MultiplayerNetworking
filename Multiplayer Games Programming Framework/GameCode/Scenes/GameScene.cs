@@ -8,6 +8,7 @@ using System.Data;
 using System.Diagnostics;
 using Multiplayer_Games_Programming_Framework.GameCode.Components;
 using Microsoft.Xna.Framework.Graphics;
+using System.Text.Encodings.Web;
 
 namespace Multiplayer_Games_Programming_Framework
 {
@@ -30,6 +31,7 @@ namespace Multiplayer_Games_Programming_Framework
 		GameModeState m_GameModeState;
 
 		float m_GameTimer;
+		float m_GameRestartTimer;
 
 		enum WinnerState
 		{
@@ -62,8 +64,8 @@ namespace Multiplayer_Games_Programming_Framework
             float screenWidth = Constants.m_ScreenWidth;
 			float screenHeight = Constants.m_ScreenHeight;
 
-			m_Ball = GameObject.Instantiate<BallGO>(this, new Transform(new Vector2(screenWidth / 2, screenHeight / 2), new Vector2(1, 1), 0));
-			m_BallController = m_Ball.GetComponent<BallControllerComponent>();
+			//m_Ball = GameObject.Instantiate<BallGO>(this, new Transform(new Vector2(screenWidth / 2, screenHeight / 2), new Vector2(1, 1), 0));
+			//m_BallController = m_Ball.GetComponent<BallControllerComponent>();
 
 			if (NetworkManager.m_Instance.m_index == 0)
 			{
@@ -85,6 +87,7 @@ namespace Multiplayer_Games_Programming_Framework
 			//Border
 			Vector2[] wallPos = new Vector2[]
 			{
+
 				new Vector2(screenWidth/2, 0), //top
 				new Vector2(screenWidth, screenHeight/2), //right
 				new Vector2(screenWidth/2, screenHeight), //bottom
@@ -136,57 +139,65 @@ namespace Multiplayer_Games_Programming_Framework
 
 		public override void Update(float deltaTime)
 		{
-			base.Update(deltaTime);
+			base.Update(deltaTime);			
 
-			
-
-			m_GameTimer += deltaTime;
+			if(m_GameModeState == GameModeState.PLAYING)
+			{
+				m_GameTimer += deltaTime;
+			}
+			if(m_GameModeState == GameModeState.ENDING)
+			{
+				m_GameRestartTimer -= deltaTime;
+			}
 
 			switch (m_GameModeState)
 			{
 				case GameModeState.AWAKE:
-					m_GameModeState = GameModeState.STARTING;
-					break;
+                    NetworkManager.m_Instance.m_playerOneScore = 0;
+                    NetworkManager.m_Instance.m_playerTwoScore = 0;
+					m_GameTimer = 0;
+					m_GameRestartTimer = 5;
+                    m_Ball = GameObject.Instantiate<BallGO>(this, new Transform(new Vector2(Constants.m_ScreenWidth / 2, Constants.m_ScreenHeight / 2), new Vector2(1, 1), 0));
+                    m_BallController = m_Ball.GetComponent<BallControllerComponent>();
+                    m_GameModeState = GameModeState.STARTING;
+                    break;
 
 				case GameModeState.STARTING:
 					m_BallController.Init(10, new Vector2((float)m_Random.NextDouble(), (float)m_Random.NextDouble()));
-					m_BallController.StartBall();
-					
-					m_GameModeState = GameModeState.PLAYING;
+					m_BallController.StartBall();					
+                    m_GameModeState = GameModeState.PLAYING;
 
 					break;
 
-				case GameModeState.PLAYING:
-
-					//if(m_GameTimer > 60)
-					//{
-					//	//m_Ball.Destroy();						
-					//	m_GameModeState = GameModeState.ENDING;
-					//}
-					if(NetworkManager.m_Instance.m_playerOneScore > 1)
+				case GameModeState.PLAYING:					
+					if(NetworkManager.m_Instance.m_playerOneScore > 7)
 					{
 						//player one wins
 						m_winningPlayer = WinnerState.PLAYERONE;
                         m_GameModeState = GameModeState.ENDING;
+                        m_Ball.Destroy();
                     }
 					else if(NetworkManager.m_Instance.m_playerTwoScore >  7)
 					{
                         //player two wins
                         m_winningPlayer = WinnerState.PLAYERTWO;
                         m_GameModeState = GameModeState.ENDING;
+                        m_Ball.Destroy();
                     }
-					else
+					else if (m_GameTimer < 0)
 					{
                         //draw
                         m_winningPlayer = WinnerState.DRAW;
                         m_GameModeState = GameModeState.ENDING;
+                        m_Ball.Destroy();
                     }
-
 					break;
-
 				case GameModeState.ENDING:
-
 					Debug.WriteLine("Game Over");
+					if(m_GameRestartTimer < 0)
+					{
+						m_GameModeState = GameModeState.AWAKE;
+					}
 					break;
 				default:
 					break;
@@ -198,23 +209,31 @@ namespace Multiplayer_Games_Programming_Framework
 			base.Draw(deltaTime);			
 			m_spriteBatch.DrawString(m_font, "Player One: " + NetworkManager.m_Instance.m_playerOneScore, new Vector2(100, 10), Color.CornflowerBlue, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
 			m_spriteBatch.DrawString(m_font, "Player Two: " + NetworkManager.m_Instance.m_playerTwoScore, new Vector2(400, 10), Color.CornflowerBlue, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
-			switch(m_winningPlayer)
+			m_spriteBatch.DrawString(m_font, Math.Round(90 - m_GameTimer).ToString(), new Vector2(Constants.m_ScreenWidth / 2, 0), Color.Red, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
+
+			if(m_GameModeState == GameModeState.ENDING)
 			{
-				case WinnerState.PLAYERONE:
-                    m_spriteBatch.DrawString(m_font, "Player One Wins!!!", new Vector2(0, 0), Color.White, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
+				switch(m_winningPlayer)
+				{
+					case WinnerState.PLAYERONE:
+				        m_spriteBatch.DrawString(m_font, "Player One Wins!!!", new Vector2(Constants.m_ScreenWidth / 2, Constants.m_ScreenHeight / 2), Color.White, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
 
-                    break;
-				case WinnerState.PLAYERTWO:
-                    m_spriteBatch.DrawString(m_font, "Player Two Wins!!!", new Vector2(0, 0), Color.White, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
+				        break;
+					case WinnerState.PLAYERTWO:
+				        m_spriteBatch.DrawString(m_font, "Player Two Wins!!!", new Vector2(Constants.m_ScreenWidth / 2, Constants.m_ScreenHeight / 2), Color.White, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
 
-                    break;
-				case WinnerState.DRAW:
-                    m_spriteBatch.DrawString(m_font, "Draw", new Vector2(0, 0), Color.White, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
-                    break;
+				        break;
+					case WinnerState.DRAW:
+				        m_spriteBatch.DrawString(m_font, "Draw", new Vector2(Constants.m_ScreenWidth / 2, Constants.m_ScreenHeight / 2), Color.White, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
+				        break;
 
-				default:
-					break;
-			}
-		}
+					default:
+						break;
+				}
+                m_spriteBatch.DrawString(m_font, "Game Restarting in: " + Math.Round(m_GameRestartTimer) , new Vector2(Constants.m_ScreenWidth / 2, Constants.m_ScreenHeight / 2 + 20), Color.White, 0, new Vector2(0, 0), 1, SpriteEffects.None, 1);
+
+            }
+
+        }
 	}
 }
