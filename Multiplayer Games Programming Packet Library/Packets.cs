@@ -14,6 +14,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		SCOREPACKET,
         ENCRYPTEDPACKET,
 		GAMESTATEPACKET,
+        TIMERPACKET
 	}
 
 	[Serializable]
@@ -62,8 +63,6 @@ namespace Multiplayer_Games_Programming_Packet_Library
 			Type = PacketType.MESSAGEPACKET;
 			m_message = message;
 		}
-		       
-
     }
 
 	[Serializable]
@@ -113,7 +112,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public LoginPacket(int index)
         {
             Type = PacketType.LOGINPACKET;
-            m_index = index;           
+            m_index = index;
         }
 
         public LoginPacket(int index, RSAParameters key)
@@ -153,13 +152,13 @@ namespace Multiplayer_Games_Programming_Packet_Library
     public class ScorePacket : Packet
     {
         [JsonPropertyName("Index")]
-        public int? m_index;
+        public int? m_index{ get; set; }
 
         [JsonPropertyName("PlayerOneScore")]
-        public int m_playerOneScore;
+        public int m_playerOneScore{ get; set; }
 
         [JsonPropertyName("PlayerTwoScore")]
-        public int m_playerTwoScore;
+        public int m_playerTwoScore{ get; set; }
 
         public ScorePacket()
         {
@@ -185,12 +184,12 @@ namespace Multiplayer_Games_Programming_Packet_Library
 	public class EncryptedPacket : Packet
 	{
 		[JsonPropertyName("Index")]
-		public int? m_index;
+		public int? m_index { get; set; }
 
-		[JsonPropertyName("Data")]
-		public byte[] m_encryptedData;	
+        [JsonPropertyName("Data")]
+		public byte[] m_encryptedData { get; set; }
 
-		public EncryptedPacket()
+        public EncryptedPacket()
 		{
 			Type = PacketType.ENCRYPTEDPACKET;
 			m_index = int.MaxValue;
@@ -209,10 +208,14 @@ namespace Multiplayer_Games_Programming_Packet_Library
     public class GameStatePacket : Packet
     {
         [JsonPropertyName("Index")]
-        public int? m_index;
+        public int m_index{ get; set; }
 
-        [JsonPropertyName("Data")]
-        public int m_gameState;
+		[JsonPropertyName("Game State")]
+        public int m_gameState { get; set; }      
+
+		[JsonPropertyName("Winner")]
+		public int m_winnerState { get; set; }
+
 
         public GameStatePacket()
         {
@@ -226,6 +229,37 @@ namespace Multiplayer_Games_Programming_Packet_Library
             Type = PacketType.GAMESTATEPACKET;
             m_gameState = gameState;
             m_index = index;
+        }
+        public GameStatePacket(int index, int gameState, int winnerState)
+        {
+            Type = PacketType.GAMESTATEPACKET;
+            m_index = index;
+            m_gameState = gameState;
+			m_winnerState = winnerState;
+        }
+    }
+
+    [Serializable]
+    public class TimerPacket : Packet
+    {
+        [JsonPropertyName("GameTimer")]
+        public float m_gameTimer;
+
+        [JsonPropertyName("RestartTimer")]
+        public float m_restartTimer;
+
+        public TimerPacket()
+        {
+            Type = PacketType.TIMERPACKET;
+            m_gameTimer = float.MaxValue;
+            m_restartTimer = float.MaxValue;
+        }
+
+        public TimerPacket(float gameTimer, float restarttimer)
+        {
+            Type = PacketType.TIMERPACKET;
+            m_gameTimer = gameTimer;
+            m_restartTimer = restarttimer; 
         }
     }
 
@@ -266,6 +300,10 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     if (typeProperty.GetByte() == (byte)PacketType.GAMESTATEPACKET)
                     {
                         return JsonSerializer.Deserialize<GameStatePacket>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.TIMERPACKET)
+                    {
+                        return JsonSerializer.Deserialize<TimerPacket>(root.GetRawText(), options);
                     }
                 }
 			}

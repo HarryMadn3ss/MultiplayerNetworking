@@ -182,6 +182,26 @@ namespace Multiplayer_Games_Programming_Server
 							}
 						}                       
                         break;
+					case PacketType.TIMERPACKET:
+						TimerPacket tp = (TimerPacket)packet;						
+						//if(index == 0)
+						//{
+      //                      ConnectedClient? timerReceiver;
+      //                      if (m_Clients.TryGetValue((index - 1), out timerReceiver))
+      //                      {
+      //                          timerReceiver.Send(index, new TimerPacket(tp.m_gameTimer, tp.m_restartTimer));
+      //                      }
+      //                  }
+						//else
+						{
+                            ConnectedClient? timerReceiver;
+                            if (m_Clients.TryGetValue((index + 1), out timerReceiver))
+							{
+								timerReceiver?.Send(index, new TimerPacket(tp.m_gameTimer, tp.m_restartTimer));
+							}
+						}
+						
+						break;
                     default: break;
                 } 
             }
@@ -217,6 +237,21 @@ namespace Multiplayer_Games_Programming_Server
                         MessagePacket sendLoginResponse = new MessagePacket("Message has been Recieved: Address Saved");
                         SendUDP(sendLoginResponse, m_Clients[lp.m_index].GetUDPAddress());
                         break;
+					case PacketType.GAMESTATEPACKET:
+						GameStatePacket gsp = (GameStatePacket)packetToRead;
+						GameStatePacket SendGameStatePacket = new GameStatePacket(gsp.m_index, gsp.m_gameState, gsp.m_winnerState);
+						if(gsp.m_gameState == 0)
+						{
+							playerOneScore = 0;
+							playerTwoScore = 0;
+						}
+
+						ConnectedClient receiverClient;
+						if (m_Clients.TryGetValue(gsp.m_index + 1, out receiverClient))
+						{
+							SendUDP(SendGameStatePacket, receiverClient.GetUDPAddress());
+						}
+                            break;
 					default:
                         break;
                 }

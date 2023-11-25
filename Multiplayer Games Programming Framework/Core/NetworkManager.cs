@@ -54,8 +54,12 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		public RSAParameters m_publicKey; //clients public key
 		RSAParameters m_privateKey; //clients private key
 		RSAParameters m_serverPublicKey;
-		
-		
+
+		//gamemodes
+		public int m_gameState;
+		public int m_gameWinner;
+		public float m_gameTimer;
+		public float m_gameRestartTimer;
 
 		//events
 		//public dictoionary < int, Action<vector2> m_playerpostions
@@ -68,7 +72,7 @@ namespace Multiplayer_Games_Programming_Framework.Core
 			//keys
 			m_RSAProvider = new RSACryptoServiceProvider(1024); //number denotes how strong the encryption, the higher the number the slower -  this number cannot change between setting the keys
 			m_publicKey = m_RSAProvider.ExportParameters(false); //false sets to public key
-			m_privateKey = m_RSAProvider.ExportParameters(true); //true sets it to private by adding more parameters
+			m_privateKey = m_RSAProvider.ExportParameters(true); //true sets it to private by adding more parameters			
 		}
 
 		public bool Connect(string ip, int port)
@@ -162,8 +166,8 @@ namespace Multiplayer_Games_Programming_Framework.Core
                     LoginPacket lp = (LoginPacket)packet;
                     m_index = lp.m_index;					
                     m_serverPublicKey = lp.m_key;
-
-					LoginPacket UdpLogin = new LoginPacket(m_index);
+                    Debug.WriteLine(m_index.ToString());
+                    LoginPacket UdpLogin = new LoginPacket(m_index);
 					UdpSendMessage(UdpLogin);
                     break;
                 case PacketType.BALLPACKET:
@@ -180,6 +184,12 @@ namespace Multiplayer_Games_Programming_Framework.Core
                     m_playerOneScore = sp.m_playerOneScore;
                     m_playerTwoScore = sp.m_playerTwoScore;
                     break;
+
+				case PacketType.TIMERPACKET:
+					TimerPacket tp = (TimerPacket)packet;
+					m_gameTimer = tp.m_gameTimer;
+					m_gameRestartTimer = tp.m_restartTimer;
+					break;
 
                 default:
                     Debug.WriteLine($"Packet type invaild: NM! {packet.Type}");
@@ -203,8 +213,8 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		public void Login()
 		{
 			LoginPacket loginPacket = new LoginPacket(m_index, m_publicKey);
-            //MessagePacket messagePacket = new MessagePacket("Client " + m_index + " - login Attempt");
-
+			//MessagePacket messagePacket = new MessagePacket("Client " + m_index + " - login Attempt");
+			Debug.WriteLine(m_index.ToString());
 			//UdpSendMessage(messagePacket);
             TCPSendMessage(loginPacket, false);
 		}
@@ -227,6 +237,11 @@ namespace Multiplayer_Games_Programming_Framework.Core
                             MessagePacket mp = (MessagePacket)packet;
                             Debug.WriteLine("UDP msg Recieved: " + mp.m_message);
                             break;
+						case PacketType.GAMESTATEPACKET:
+							GameStatePacket gsp = (GameStatePacket)packet;
+							m_gameState = gsp.m_gameState;
+							m_gameWinner = gsp.m_winnerState;
+							break;
 
 						default: break;
 					}
