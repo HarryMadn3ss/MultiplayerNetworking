@@ -51,6 +51,6 @@ namespace Multiplayer_Games_Programming_Framework
 
 			Debug.WriteLine("Category not found: " + name + ". Returning Category.None");
 			return Category.None;
-		}
-	}
+		}       
+    }
 }

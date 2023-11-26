@@ -12,6 +12,17 @@ namespace Multiplayer_Games_Programming_Server
 {
 	internal class Server
 	{
+		struct GameLobby
+		{
+			public ConnectedClient playerOne;
+			public ConnectedClient playerTwo;
+			public bool full;		
+		};
+
+		GameLobby[] m_gameLobbies = new GameLobby[2];
+
+		
+
 		TcpListener m_TcpListener; //listens for tcp connections on certain ip addresses
 		UdpClient m_UdpListener; //listen for udp responses
 
@@ -41,17 +52,15 @@ namespace Multiplayer_Games_Programming_Server
 				while(true)
 				{
                     Socket socket = m_TcpListener.AcceptSocket(); //blocking call so if no connections we will wait					
-                    Console.WriteLine("Connection Has Been Made");
-                    //Console.WriteLine(Thread.CurrentThread.Name);
-					ConnectedClient conClient = new ConnectedClient(index, socket);
-                    //conClient.Login(index);
+                    Console.WriteLine("Connection Has Been Made");                    
+					ConnectedClient conClient = new ConnectedClient(index, socket);                    
                     m_Clients.GetOrAdd(index, conClient);
                     Thread thread = new Thread(() => { ClientMethod(index); });
 					thread.Name = "Player Index: " + index.ToString();
 					thread.Start();
-					//LoginPacket loginPacket = new LoginPacket(index);
-                    conClient.Send(index, new LoginPacket(index, conClient.m_publicKey), false);
-					//conClient.Send(index, loginPacket, false);
+					conClient.m_lobbyNumber = FillGameLobbies(conClient);
+					conClient.m_index = index;
+                    conClient.Send(index, new LoginPacket(index, conClient.m_publicKey, conClient.m_lobbyNumber), false);					
 					index++;
 				}
 
@@ -137,9 +146,9 @@ namespace Multiplayer_Games_Programming_Server
                         break;
                     case PacketType.LOGINPACKET:
                         LoginPacket lp = (LoginPacket)packet;
-						//m_Clients[index].Send(new LoginPacket(index, m_publicKey));
+						
 						m_Clients[index].AssignKey(lp.m_key);
-                        //AssignKey(lp.m_index, lp.m_key);
+                        
                         break;
 
                     case PacketType.BALLPACKET:
@@ -183,25 +192,42 @@ namespace Multiplayer_Games_Programming_Server
 						}                       
                         break;
 					case PacketType.TIMERPACKET:
-						TimerPacket tp = (TimerPacket)packet;						
-						//if(index == 0)
-						//{
-      //                      ConnectedClient? timerReceiver;
-      //                      if (m_Clients.TryGetValue((index - 1), out timerReceiver))
-      //                      {
-      //                          timerReceiver.Send(index, new TimerPacket(tp.m_gameTimer, tp.m_restartTimer));
-      //                      }
-      //                  }
-						//else
+						TimerPacket tp = (TimerPacket)packet;
 						{
                             ConnectedClient? timerReceiver;
                             if (m_Clients.TryGetValue((index + 1), out timerReceiver))
 							{
 								timerReceiver?.Send(index, new TimerPacket(tp.m_gameTimer, tp.m_restartTimer));
 							}
-						}
-						
+						}						
 						break;
+
+					case PacketType.SERVERSTATUSPACKET:
+						ServerStatusPacket ssp = (ServerStatusPacket)packet;
+						if (m_gameLobbies[ssp.m_serverNumber].full)
+						{
+							ServerStatusPacket serverResponse = new ServerStatusPacket(ssp.m_serverNumber, true);
+							m_gameLobbies[ssp.m_serverNumber].playerOne.Send(index, serverResponse, false);
+							m_gameLobbies[ssp.m_serverNumber].playerTwo.Send(index, serverResponse, false);
+
+						}
+						break;
+
+					case PacketType.GAMESTARTPACKET:
+						GameStartPacket gsp = (GameStartPacket)packet;
+						if(gsp.m_startGame)
+						{                            
+                            m_gameLobbies[gsp.m_lobbyNumber].playerOne.Send(index, gsp);
+                            m_gameLobbies[gsp.m_lobbyNumber].playerTwo.Send(index, gsp);
+                        }
+						break;
+
+                    case PacketType.GAMECOUNTDOWN:
+                        GameCountdownPacket gcd = (GameCountdownPacket)packet;
+                        m_gameLobbies[gcd.m_lobbyNumber].playerOne.Send(index, gcd);
+                        m_gameLobbies[gcd.m_lobbyNumber].playerTwo.Send(index, gcd);                        
+                        break;
+
                     default: break;
                 } 
             }
@@ -227,15 +253,23 @@ namespace Multiplayer_Games_Programming_Server
 				{
 					case PacketType.MESSAGEPACKET:
 						MessagePacket mp = (MessagePacket)packetToRead;
-						Console.WriteLine("UDP msg Recieved: " + mp.m_message);						
+						Console.WriteLine("UDP msg Recieved: " + mp.m_message);
 						MessagePacket sendResponse = new MessagePacket("Message has been Recieved");
 						SendUDP(sendResponse, receiveResult);
 						break;
 					case PacketType.LOGINPACKET:
-						LoginPacket lp = (LoginPacket)packetToRead;                        
-                        m_Clients[lp.m_index].SetUDPAddress(receiveResult);
-                        MessagePacket sendLoginResponse = new MessagePacket("Message has been Recieved: Address Saved");
-                        SendUDP(sendLoginResponse, m_Clients[lp.m_index].GetUDPAddress());
+						LoginPacket lp = (LoginPacket)packetToRead;
+						m_Clients[lp.m_index].SetUDPAddress(receiveResult);
+						MessagePacket sendLoginResponse = new MessagePacket("Message has been Recieved: Address Saved");
+						SendUDP(sendLoginResponse, m_Clients[lp.m_index].GetUDPAddress());
+
+						if (m_Clients[lp.m_index].m_lobbyReady)
+						{
+							LobbyPacket lobbyPacket = new LobbyPacket(true);
+							m_gameLobbies[lp.m_index].playerOne.Send(lp.m_index, lobbyPacket, false);
+							m_gameLobbies[lp.m_index].playerTwo.Send(lp.m_index, lobbyPacket, false);
+						}
+
                         break;
 					case PacketType.GAMESTATEPACKET:
 						GameStatePacket gsp = (GameStatePacket)packetToRead;
@@ -264,5 +298,50 @@ namespace Multiplayer_Games_Programming_Server
             byte[] bytes = Encoding.UTF8.GetBytes(packetToSend);
 			m_UdpListener.SendAsync(bytes, bytes.Length, receiveResult.RemoteEndPoint);
         }		
+
+		public int FillGameLobbies(ConnectedClient client)
+		{
+            if (!m_gameLobbies[0].full)
+            {
+                if (m_gameLobbies[0].playerOne == null)
+                {
+					client.m_playerNumber = 1;
+                    m_gameLobbies[0].playerOne = client;
+                    LobbyPacket lobbyPacket = new LobbyPacket(client.m_lobbyNumber, client.m_playerNumber);
+					client.Send(client.m_index, lobbyPacket, false);
+                }
+                else
+                {
+					client.m_playerNumber = 2;
+                    m_gameLobbies[0].playerTwo = client;
+					m_gameLobbies[0].full = true;
+					LobbyPacket lobbyPacket = new LobbyPacket(client.m_lobbyNumber, client.m_playerNumber);
+                    client.Send(client.m_index, lobbyPacket, false);
+                }
+                return 0;
+            }
+			else
+			{
+                if (!m_gameLobbies[1].full)
+                {
+                    if (m_gameLobbies[1].playerOne == null)
+                    {
+                        client.m_playerNumber = 1;
+                        m_gameLobbies[1].playerOne = client;
+                        LobbyPacket lobbyPacket = new LobbyPacket(client.m_lobbyNumber, client.m_playerNumber);
+                        client.Send(client.m_index, lobbyPacket, false);
+                    }
+                    else
+                    {
+                        client.m_playerNumber = 2;
+                        m_gameLobbies[1].playerTwo = client;
+                        m_gameLobbies[1].full = true;
+                        LobbyPacket lobbyPacket = new LobbyPacket(client.m_lobbyNumber, client.m_playerNumber);
+                        client.Send(client.m_index, lobbyPacket, false);
+                    }
+                }
+				return 1;
+            }			
+        }
     }
 }

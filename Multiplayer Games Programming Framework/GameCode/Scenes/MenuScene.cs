@@ -3,6 +3,7 @@ using Myra.Graphics2D.UI;
 using nkast.Aether.Physics2D.Dynamics;
 using Multiplayer_Games_Programming_Framework.Core;
 using System.Diagnostics;
+using Multiplayer_Games_Programming_Packet_Library;
 
 namespace Multiplayer_Games_Programming_Framework
 {
@@ -62,21 +63,23 @@ namespace Multiplayer_Games_Programming_Framework
 			LoginButton.Height = (Constants.m_ScreenHeight / rows) * LoginButton.GridRowSpan;
 			grid.Widgets.Add(LoginButton);
 
-			var PlayButton = new TextButton();
-			PlayButton.Text = "Play";
-			PlayButton.GridRow = 3;
-			PlayButton.GridColumn = 1;
-			PlayButton.GridColumnSpan = 2;
-			PlayButton.HorizontalAlignment = HorizontalAlignment.Center;
-			PlayButton.VerticalAlignment = VerticalAlignment.Center;
-			PlayButton.Width = (Constants.m_ScreenWidth / cols) * LoginButton.GridColumnSpan;
-			PlayButton.Height = (Constants.m_ScreenHeight / rows) * LoginButton.GridRowSpan;
-			PlayButton.Enabled = false;
-			grid.Widgets.Add(PlayButton);
+			var joinLobbyButton = new TextButton();
+			joinLobbyButton.Text = "Join Lobby";
+			joinLobbyButton.GridRow = 3;
+			joinLobbyButton.GridColumn = 1;
+			joinLobbyButton.GridColumnSpan = 2;
+			joinLobbyButton.HorizontalAlignment = HorizontalAlignment.Center;
+			joinLobbyButton.VerticalAlignment = VerticalAlignment.Center;
+			joinLobbyButton.Width = (Constants.m_ScreenWidth / cols) * LoginButton.GridColumnSpan;
+			joinLobbyButton.Height = (Constants.m_ScreenHeight / rows) * LoginButton.GridRowSpan;
+			joinLobbyButton.Enabled = false;
+			grid.Widgets.Add(joinLobbyButton);
 
-			PlayButton.Click += (s, a) =>
+			joinLobbyButton.Click += (s, a) =>
 			{
-				m_Manager.LoadScene(new GameScene(m_Manager));
+				m_Manager.LoadScene(new LobbyScene(m_Manager));
+				ServerStatusPacket requestServerStatus = new ServerStatusPacket(NetworkManager.m_Instance.m_lobbyNumber);
+				NetworkManager.m_Instance.TCPSendMessage(requestServerStatus, false);
 			};
 
 			var childPanel = new Panel();
@@ -89,7 +92,7 @@ namespace Multiplayer_Games_Programming_Framework
 			{
 				if (NetworkManager.m_Instance.Connect("127.0.0.1", 4444))
 				{
-					PlayButton.Enabled = true;
+					joinLobbyButton.Enabled = true;
 					NetworkManager.m_Instance.Login();
 				}
 				else

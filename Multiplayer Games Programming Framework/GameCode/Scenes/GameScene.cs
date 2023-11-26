@@ -257,7 +257,7 @@ namespace Multiplayer_Games_Programming_Framework
                             m_winningPlayer = (WinnerState)NetworkManager.m_Instance.m_gameWinner;
                         }
                     }
-					else if (m_GameTimer > 89)
+					else if (m_GameTimer > 90)
 					{
                        
                         m_Ball.Destroy();

@@ -61,8 +61,12 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		public float m_gameTimer;
 		public float m_gameRestartTimer;
 
-		//events
-		//public dictoionary < int, Action<vector2> m_playerpostions
+		public int m_lobbyNumber;
+		public int m_playerNumber;
+		public bool m_lobbyReady;
+		public bool m_gameStart;
+		public float m_countDown;
+		
 
 
 		NetworkManager()
@@ -162,14 +166,15 @@ namespace Multiplayer_Games_Programming_Framework.Core
                     break;
 
                 case PacketType.LOGINPACKET:
-
                     LoginPacket lp = (LoginPacket)packet;
                     m_index = lp.m_index;					
                     m_serverPublicKey = lp.m_key;
-                    Debug.WriteLine(m_index.ToString());
+					m_lobbyNumber = lp.m_lobbyNumber;
+                    //Debug.WriteLine(m_index.ToString());
                     LoginPacket UdpLogin = new LoginPacket(m_index);
 					UdpSendMessage(UdpLogin);
                     break;
+
                 case PacketType.BALLPACKET:
                     //update pos of indexed paddle
                     BallPacket bp = (BallPacket)packet;
@@ -189,6 +194,29 @@ namespace Multiplayer_Games_Programming_Framework.Core
 					TimerPacket tp = (TimerPacket)packet;
 					m_gameTimer = tp.m_gameTimer;
 					m_gameRestartTimer = tp.m_restartTimer;
+					break;
+
+				case PacketType.LOBBYPACKET:
+					LobbyPacket lobbyP = (LobbyPacket)packet;
+					m_lobbyNumber = lobbyP.m_lobbyNumber;
+					m_playerNumber = lobbyP.m_playerNumber;
+					m_lobbyReady = lobbyP.m_lobbyReady;
+					break;
+
+				case PacketType.SERVERSTATUSPACKET:
+					ServerStatusPacket ssp = (ServerStatusPacket)packet;
+					m_lobbyReady = ssp.m_online;
+					break;
+
+				case PacketType.GAMESTARTPACKET:
+					GameStartPacket gsp = (GameStartPacket)packet;
+					m_gameStart = gsp.m_startGame;
+					//m_countDown = 3;
+					break;
+
+				case PacketType.GAMECOUNTDOWN:
+					GameCountdownPacket gcp = (GameCountdownPacket)packet;
+					m_countDown = gcp.m_countdown;
 					break;
 
                 default:
@@ -212,7 +240,7 @@ namespace Multiplayer_Games_Programming_Framework.Core
 
 		public void Login()
 		{
-			LoginPacket loginPacket = new LoginPacket(m_index, m_publicKey);
+			LoginPacket loginPacket = new LoginPacket(m_index, m_publicKey, m_lobbyNumber);
 			//MessagePacket messagePacket = new MessagePacket("Client " + m_index + " - login Attempt");
 			Debug.WriteLine(m_index.ToString());
 			//UdpSendMessage(messagePacket);

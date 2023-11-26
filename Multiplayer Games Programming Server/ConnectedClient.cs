@@ -23,6 +23,12 @@ namespace Multiplayer_Games_Programming_Server
         //UDP address
         UdpReceiveResult _UDPAddress;
 
+        //Lobby Info
+        public int m_index;
+        public int m_lobbyNumber;
+        public int m_playerNumber;
+        public bool m_lobbyReady;
+
         public ConnectedClient(int index, Socket socket)
 		{
             m_rsaProvider = new RSACryptoServiceProvider(1024); //must match the clients key size
@@ -67,7 +73,7 @@ namespace Multiplayer_Games_Programming_Server
 
         public void Login(int index)
         {
-            LoginPacket loginPacket = new LoginPacket(index, m_publicKey);
+            LoginPacket loginPacket = new LoginPacket(index, m_publicKey, m_lobbyNumber);
 
             Send(index, loginPacket, false);
             

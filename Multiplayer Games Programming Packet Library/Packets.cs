@@ -14,8 +14,12 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		SCOREPACKET,
         ENCRYPTEDPACKET,
 		GAMESTATEPACKET,
-        TIMERPACKET
-	}
+        TIMERPACKET,
+        LOBBYPACKET,
+        SERVERSTATUSPACKET,
+        GAMESTARTPACKET,
+        GAMECOUNTDOWN
+    }
 
 	[Serializable]
 	public class Packet
@@ -103,11 +107,15 @@ namespace Multiplayer_Games_Programming_Packet_Library
         [JsonPropertyName("Key")]
         public RSAParameters m_key { get; set; }
 
+        [JsonPropertyName("LobbyNumber")]
+        public int m_lobbyNumber { get; set; }
+
         public LoginPacket()
         {
             Type = PacketType.LOGINPACKET;
 			m_index = int.MaxValue;
 			m_key = new RSAParameters();
+            m_lobbyNumber = int.MaxValue;
         }
         public LoginPacket(int index)
         {
@@ -115,15 +123,15 @@ namespace Multiplayer_Games_Programming_Packet_Library
             m_index = index;
         }
 
-        public LoginPacket(int index, RSAParameters key)
+        public LoginPacket(int index, RSAParameters key, int lobbyNumber)
         {
             Type = PacketType.LOGINPACKET;
             m_index = index;
 			m_key = key;
+            m_lobbyNumber = lobbyNumber;
         }
-
-
     }
+
     [Serializable]
     public class BallPacket : Packet
     {    
@@ -246,13 +254,13 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public float m_gameTimer;
 
         [JsonPropertyName("RestartTimer")]
-        public float m_restartTimer;
+        public float m_restartTimer;        
 
         public TimerPacket()
         {
             Type = PacketType.TIMERPACKET;
             m_gameTimer = float.MaxValue;
-            m_restartTimer = float.MaxValue;
+            m_restartTimer = float.MaxValue;           
         }
 
         public TimerPacket(float gameTimer, float restarttimer)
@@ -260,8 +268,120 @@ namespace Multiplayer_Games_Programming_Packet_Library
             Type = PacketType.TIMERPACKET;
             m_gameTimer = gameTimer;
             m_restartTimer = restarttimer; 
+        }       
+    }
+
+    [Serializable]
+    public class LobbyPacket : Packet
+    {
+        [JsonPropertyName("LobbyNumber")]
+        public int m_lobbyNumber { get; set; }
+
+        [JsonPropertyName("LobbyReady")]
+        public bool m_lobbyReady { get; set;}
+
+        [JsonPropertyName("PlayerNumber")]
+        public int m_playerNumber;
+
+        public LobbyPacket()
+        {
+            Type = PacketType.LOBBYPACKET;
+            m_lobbyNumber = int.MaxValue;
+            m_lobbyReady = false;
+            m_playerNumber = int.MaxValue;
+        }
+        public LobbyPacket(bool ready)
+        {
+            Type = PacketType.LOBBYPACKET;
+            m_lobbyReady = ready;           
+        }
+
+        public LobbyPacket(int lobbynumber, int playerNumber)
+        {
+            Type = PacketType.LOBBYPACKET;
+            m_lobbyNumber = lobbynumber;           
+            m_playerNumber = playerNumber;
+        }
+
+    }
+
+    [Serializable]
+    public class ServerStatusPacket : Packet
+    {
+        [JsonPropertyName("ServerNumber")]
+        public int m_serverNumber;
+
+        [JsonPropertyName("Status")]
+        public bool m_online { get; set; }
+
+        public ServerStatusPacket()
+        {
+            Type = PacketType.SERVERSTATUSPACKET;
+            m_serverNumber = int.MaxValue;
+            m_online = false;
+        }
+
+        public ServerStatusPacket(int serverNumber)
+        {
+            Type = PacketType.SERVERSTATUSPACKET;
+            m_serverNumber = serverNumber;
+        }
+
+        public ServerStatusPacket(int serverNumber, bool online)
+        {
+            Type = PacketType.SERVERSTATUSPACKET;
+            m_serverNumber = serverNumber;
+            m_online = online;
         }
     }
+
+    [Serializable]
+    public class GameStartPacket : Packet
+    {
+        [JsonPropertyName("GameStart")]
+        public bool m_startGame { get; set; }
+
+        [JsonPropertyName("LobbyNumber")]
+        public int m_lobbyNumber { get; set; }
+
+        public GameStartPacket()
+        {
+            Type = PacketType.GAMESTARTPACKET;
+            m_startGame = false;
+            m_lobbyNumber = int.MaxValue;
+        }
+        public GameStartPacket(bool startGame, int lobbyNumber)
+        {
+            Type = PacketType.GAMESTARTPACKET;
+            m_startGame = true;
+            m_lobbyNumber = m_lobbyNumber;
+        }
+    }
+
+    [Serializable]
+    public class GameCountdownPacket : Packet
+    {
+        [JsonPropertyName("GameCountdown")]
+        public float m_countdown { get; set; }
+
+        [JsonPropertyName("LobbyNumber")]
+        public int m_lobbyNumber { get; set; }
+
+        public GameCountdownPacket()
+        {
+            Type = PacketType.TIMERPACKET;
+            m_countdown = float.MaxValue;
+        }
+
+        public GameCountdownPacket(int lobbyNumber, float countdown)
+        {
+            Type = PacketType.TIMERPACKET;
+            m_lobbyNumber = lobbyNumber;
+            m_countdown = countdown;
+        }
+    }
+
+
 
     [Serializable]
 	public class PacketConverter : JsonConverter<Packet> 
@@ -304,6 +424,22 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     if (typeProperty.GetByte() == (byte)PacketType.TIMERPACKET)
                     {
                         return JsonSerializer.Deserialize<TimerPacket>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.LOBBYPACKET)
+                    {
+                        return JsonSerializer.Deserialize<LobbyPacket>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.SERVERSTATUSPACKET)
+                    {
+                        return JsonSerializer.Deserialize<ServerStatusPacket>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.GAMESTARTPACKET)
+                    {
+                        return JsonSerializer.Deserialize<GameStartPacket>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.GAMECOUNTDOWN)
+                    {
+                        return JsonSerializer.Deserialize<GameCountdownPacket>(root.GetRawText(), options);
                     }
                 }
 			}
