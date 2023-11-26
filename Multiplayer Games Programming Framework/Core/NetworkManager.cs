@@ -65,7 +65,7 @@ namespace Multiplayer_Games_Programming_Framework.Core
 		public int m_playerNumber;
 		public bool m_lobbyReady;
 		public bool m_gameStart;
-		public float m_countDown;
+		public float m_countDown;		
 		
 
 
@@ -266,9 +266,9 @@ namespace Multiplayer_Games_Programming_Framework.Core
                             Debug.WriteLine("UDP msg Recieved: " + mp.m_message);
                             break;
 						case PacketType.GAMESTATEPACKET:
-							GameStatePacket gsp = (GameStatePacket)packet;
+							GameStatePacket gsp = (GameStatePacket)packet;							
 							m_gameState = gsp.m_gameState;
-							m_gameWinner = gsp.m_winnerState;
+							m_gameWinner = gsp.m_winnerState;							
 							break;
 
 						default: break;

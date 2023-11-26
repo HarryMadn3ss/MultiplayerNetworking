@@ -44,6 +44,8 @@ namespace Multiplayer_Games_Programming_Framework
 
 		WinnerState m_winningPlayer;
 
+		public bool m_gameStateFlag;
+
 		public void SetGameState(int state) { m_GameModeState = (GameModeState)state; }
 		public void SetWinnerState(int state) { m_winningPlayer = (WinnerState)state; }
 
@@ -51,7 +53,7 @@ namespace Multiplayer_Games_Programming_Framework
 		public GameScene(SceneManager manager) : base(manager)
 		{
 			m_GameModeState = GameModeState.AWAKE;
-			GameStatePacket gameStatePacket = new GameStatePacket(NetworkManager.m_Instance.m_index, (int)m_GameModeState);
+			GameStatePacket gameStatePacket = new GameStatePacket(NetworkManager.m_Instance.m_lobbyNumber, NetworkManager.m_Instance.m_playerNumber, (int)m_GameModeState);
 			NetworkManager.m_Instance.UdpSendMessage(gameStatePacket);
 
 			
@@ -68,7 +70,7 @@ namespace Multiplayer_Games_Programming_Framework
 			
 			m_font =  GetContentManager().Load<SpriteFont>("font");
 
-
+			m_gameStateFlag = false;
 
             float screenWidth = Constants.m_ScreenWidth;
 			float screenHeight = Constants.m_ScreenHeight;
@@ -76,7 +78,7 @@ namespace Multiplayer_Games_Programming_Framework
 			//m_Ball = GameObject.Instantiate<BallGO>(this, new Transform(new Vector2(screenWidth / 2, screenHeight / 2), new Vector2(1, 1), 0));
 			//m_BallController = m_Ball.GetComponent<BallControllerComponent>();
 
-			if (NetworkManager.m_Instance.m_index == 0)
+			if (NetworkManager.m_Instance.m_playerNumber == 1)
 			{
 				m_PlayerPaddle = GameObject.Instantiate<PaddleGO>(this, new Transform(new Vector2(100, 500), new Vector2(5, 20), 0));
 				m_PlayerPaddle.AddComponent(new PaddleController(m_PlayerPaddle , 0));
@@ -153,10 +155,10 @@ namespace Multiplayer_Games_Programming_Framework
 			if(m_GameModeState == GameModeState.PLAYING)
 			{				
 				m_GameTimer += deltaTime;
-				if(NetworkManager.m_Instance.m_index == 0)
+				if(NetworkManager.m_Instance.m_playerNumber == 1)
 				{
-					TimerPacket timerPacket = new TimerPacket(m_GameTimer, m_GameRestartTimer);
-					NetworkManager.m_Instance.TCPSendMessage(timerPacket, false); 
+					TimerPacket timerPacket = new TimerPacket(NetworkManager.m_Instance.m_lobbyNumber, m_GameTimer, m_GameRestartTimer);
+					NetworkManager.m_Instance.TCPSendMessage(timerPacket); 
 				}
 				else
 				{
@@ -166,10 +168,10 @@ namespace Multiplayer_Games_Programming_Framework
             if (m_GameModeState == GameModeState.ENDING)
 			{
 				m_GameRestartTimer -= deltaTime;
-				if (NetworkManager.m_Instance.m_index == 0)
+				if (NetworkManager.m_Instance.m_playerNumber == 1)
 				{					
-					TimerPacket timerPacket = new TimerPacket(m_GameTimer, m_GameRestartTimer);
-					NetworkManager.m_Instance.TCPSendMessage(timerPacket, false);					
+					TimerPacket timerPacket = new TimerPacket(NetworkManager.m_Instance.m_lobbyNumber, m_GameTimer, m_GameRestartTimer);
+					NetworkManager.m_Instance.TCPSendMessage(timerPacket);					
 				}
 				else
 				{
@@ -182,15 +184,16 @@ namespace Multiplayer_Games_Programming_Framework
 				case GameModeState.AWAKE:
                     NetworkManager.m_Instance.m_playerOneScore = 0;
                     NetworkManager.m_Instance.m_playerTwoScore = 0;
+
                     m_Ball = GameObject.Instantiate<BallGO>(this, new Transform(new Vector2(Constants.m_ScreenWidth / 2, Constants.m_ScreenHeight / 2), new Vector2(1, 1), 0));
 					m_BallController = m_Ball.GetComponent<BallControllerComponent>();
 
-                    if (NetworkManager.m_Instance.m_index == 0)
+                    if (NetworkManager.m_Instance.m_playerNumber == 1)
 					{						
-						m_GameModeState = GameModeState.STARTING;
 						m_GameTimer = 0;
                         m_GameRestartTimer = 30;
-                        GameStatePacket gameAwakePacket = new GameStatePacket(NetworkManager.m_Instance.m_index, (int)m_GameModeState);
+						m_GameModeState = GameModeState.STARTING;
+                        GameStatePacket gameAwakePacket = new GameStatePacket(NetworkManager.m_Instance.m_lobbyNumber, NetworkManager.m_Instance.m_playerNumber, (int)m_GameModeState);
 						NetworkManager.m_Instance.UdpSendMessage(gameAwakePacket);						
 					}
 					else
@@ -203,12 +206,12 @@ namespace Multiplayer_Games_Programming_Framework
 
 				case GameModeState.STARTING:
 
-                    if (NetworkManager.m_Instance.m_index == 0)
+                    if (NetworkManager.m_Instance.m_playerNumber == 1)
 					{
 						m_BallController.Init(10, new Vector2((float)m_Random.NextDouble(), (float)m_Random.NextDouble()));
 						m_BallController.StartBall();					
 						m_GameModeState = GameModeState.PLAYING;
-                        GameStatePacket gamePlayingPacket = new GameStatePacket(NetworkManager.m_Instance.m_index, (int)m_GameModeState);
+                        GameStatePacket gamePlayingPacket = new GameStatePacket(NetworkManager.m_Instance.m_lobbyNumber, NetworkManager.m_Instance.m_playerNumber, (int)m_GameModeState);
 						NetworkManager.m_Instance.UdpSendMessage(gamePlayingPacket);
 					}
                     else
@@ -221,17 +224,20 @@ namespace Multiplayer_Games_Programming_Framework
                     break;
 
 				case GameModeState.PLAYING:
+
 					if(NetworkManager.m_Instance.m_playerOneScore > 7)
 					{						
-                        m_Ball.Destroy();
-						if(NetworkManager.m_Instance.m_index == 0)
+						if(NetworkManager.m_Instance.m_playerNumber == 1)
 						{
+							m_Ball.Destroy();
                             //player one wins
                             m_winningPlayer = WinnerState.PLAYERONE;
                             m_GameModeState = GameModeState.ENDING;
-                            GameStatePacket gameEndingPacket = new GameStatePacket(NetworkManager.m_Instance.m_index, (int)m_GameModeState, (int)m_winningPlayer);
+                            GameStatePacket gameEndingPacket = new GameStatePacket(NetworkManager.m_Instance.m_lobbyNumber, NetworkManager.m_Instance.m_playerNumber, (int)m_GameModeState, (int)m_winningPlayer);
 							NetworkManager.m_Instance.UdpSendMessage(gameEndingPacket);
-						}
+                            BallPacket packet = new BallPacket(NetworkManager.m_Instance.m_lobbyNumber, NetworkManager.m_Instance.m_playerNumber, -100, -100);
+                            NetworkManager.m_Instance.TCPSendMessage(packet);
+                        }
                         else
                         {
                             m_GameModeState = (GameModeState)NetworkManager.m_Instance.m_gameState;
@@ -242,15 +248,17 @@ namespace Multiplayer_Games_Programming_Framework
 					else if(NetworkManager.m_Instance.m_playerTwoScore >  7)
 					{
                         
-						m_Ball.Destroy();
-                        if (NetworkManager.m_Instance.m_index == 0)
+                        if (NetworkManager.m_Instance.m_playerNumber == 1)
 						{
+							m_Ball.Destroy();
 							//player two wins
 							m_winningPlayer = WinnerState.PLAYERTWO;
 							m_GameModeState = GameModeState.ENDING;
-                            GameStatePacket gameEndingPacket = new GameStatePacket(NetworkManager.m_Instance.m_index, (int)m_GameModeState, (int)m_winningPlayer);
+                            GameStatePacket gameEndingPacket = new GameStatePacket(NetworkManager.m_Instance.m_lobbyNumber, NetworkManager.m_Instance.m_playerNumber, (int)m_GameModeState, (int)m_winningPlayer);
 							NetworkManager.m_Instance.UdpSendMessage(gameEndingPacket);
-						}
+                            BallPacket packet = new BallPacket(NetworkManager.m_Instance.m_lobbyNumber, NetworkManager.m_Instance.m_playerNumber, -100, -100);
+                            NetworkManager.m_Instance.TCPSendMessage(packet);
+                        }
                         else
                         {
                             m_GameModeState = (GameModeState)NetworkManager.m_Instance.m_gameState;
@@ -260,19 +268,21 @@ namespace Multiplayer_Games_Programming_Framework
 					else if (m_GameTimer > 90)
 					{
                        
-                        m_Ball.Destroy();
-                        if (NetworkManager.m_Instance.m_index == 0)
+                        if (NetworkManager.m_Instance.m_playerNumber == 1)
 						{
                             //draw
+							m_Ball.Destroy();
                             m_winningPlayer = WinnerState.DRAW;
                             m_GameModeState = GameModeState.ENDING;
-                            GameStatePacket gameEndingPacket = new GameStatePacket(NetworkManager.m_Instance.m_index, (int)m_GameModeState, (int)m_winningPlayer);
+                            GameStatePacket gameEndingPacket = new GameStatePacket(NetworkManager.m_Instance.m_lobbyNumber, NetworkManager.m_Instance.m_playerNumber, (int)m_GameModeState, (int)m_winningPlayer);
 							NetworkManager.m_Instance.UdpSendMessage(gameEndingPacket);
-						}
+                            BallPacket packet = new BallPacket(NetworkManager.m_Instance.m_lobbyNumber, NetworkManager.m_Instance.m_playerNumber, -100, -100);
+                            NetworkManager.m_Instance.TCPSendMessage(packet);
+                        }
                         else
-                        {
-                            m_GameModeState = (GameModeState)NetworkManager.m_Instance.m_gameState;
-                            m_winningPlayer = (WinnerState)NetworkManager.m_Instance.m_gameWinner;
+                        {							
+							m_GameModeState = (GameModeState)NetworkManager.m_Instance.m_gameState;
+							m_winningPlayer = (WinnerState)NetworkManager.m_Instance.m_gameWinner;						
                         }
                     }
 					break;
@@ -291,16 +301,16 @@ namespace Multiplayer_Games_Programming_Framework
 
                     if (m_GameRestartTimer < 0)
 					{						
-                        if (NetworkManager.m_Instance.m_index == 0)
+                        if (NetworkManager.m_Instance.m_playerNumber == 1)
 						{
                             m_GameModeState = GameModeState.AWAKE;
-                            GameStatePacket gameRestartPacket = new GameStatePacket(NetworkManager.m_Instance.m_index, (int)m_GameModeState);
+                            GameStatePacket gameRestartPacket = new GameStatePacket(NetworkManager.m_Instance.m_lobbyNumber, NetworkManager.m_Instance.m_playerNumber, (int)m_GameModeState);
 							NetworkManager.m_Instance.UdpSendMessage(gameRestartPacket);
 						}
                         else
-                        {
-                            m_GameModeState = (GameModeState)NetworkManager.m_Instance.m_gameState;
-                            m_winningPlayer = (WinnerState)NetworkManager.m_Instance.m_gameWinner;
+                        {							
+							m_GameModeState = (GameModeState)NetworkManager.m_Instance.m_gameState;
+                            m_winningPlayer = (WinnerState)NetworkManager.m_Instance.m_gameWinner;                                    
                         }
                     }
 					break;

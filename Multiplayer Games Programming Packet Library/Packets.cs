@@ -27,6 +27,8 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		[JsonPropertyName("Type")]
 		public PacketType Type { get; set; }
 
+        
+
 		public string Serialize()
 		{
 			var options = new JsonSerializerOptions
@@ -81,18 +83,27 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		[JsonPropertyName("PositionY")]
 		public float Y { get; set; }
 
-		public PositionPacket()
+        [JsonPropertyName("LobbyNumber")]
+        public int m_lobbyNumber { get; set; }
+
+        [JsonPropertyName("PlayerNumber")]
+        public int m_playerNumber;
+
+        public PositionPacket()
 		{
 			Type = PacketType.POSITIONPACKET;
 			Index = int.MaxValue;
 			X = float.MaxValue;
 			Y = float.MaxValue;
+            m_lobbyNumber = int.MaxValue;
+            m_playerNumber = int.MaxValue;
 		}
 
-		public PositionPacket(int index, float x, float y)
+		public PositionPacket(int lobbyNumber, int playerNumber, float x, float y)
 		{
 			Type = PacketType.POSITIONPACKET;
-			Index = index;
+			m_lobbyNumber = lobbyNumber;
+            m_playerNumber = playerNumber;
 			X = x;
 			Y = y;
 		}        
@@ -141,16 +152,26 @@ namespace Multiplayer_Games_Programming_Packet_Library
         [JsonPropertyName("PositionY")]
         public float Y { get; set; }
 
+        [JsonPropertyName("LobbyNumber")]
+        public int m_lobbyNumber { get; set; }
+
+        [JsonPropertyName("PlayerNumber")]
+        public int m_playerNumber;
+
         public BallPacket()
         {
             Type = PacketType.BALLPACKET;
             X = float.MaxValue;
             Y = float.MaxValue;
+            m_lobbyNumber = int.MaxValue;
+            m_playerNumber = int.MaxValue;
         }
 
-        public BallPacket(float x, float y)
+        public BallPacket(int lobbyNumber, int playerNumber, float x, float y)
         {
-            Type = PacketType.BALLPACKET;            
+            Type = PacketType.BALLPACKET;
+            m_lobbyNumber = lobbyNumber;
+            m_playerNumber = playerNumber;
             X = x;
             Y = y;
         }
@@ -168,21 +189,31 @@ namespace Multiplayer_Games_Programming_Packet_Library
         [JsonPropertyName("PlayerTwoScore")]
         public int m_playerTwoScore{ get; set; }
 
+        [JsonPropertyName("LobbyNumber")]
+        public int m_lobbyNumber { get; set; }
+
+        [JsonPropertyName("PlayerNumber")]
+        public int m_playerNumber;
+
         public ScorePacket()
         {
             Type = PacketType.SCOREPACKET;
             m_index = int.MaxValue;
+            m_lobbyNumber = int.MaxValue;
+            m_playerNumber = int.MaxValue;
         }
 
-        public ScorePacket(int index)
+        public ScorePacket(int lobbyNumber, int playerNumber)
         {
             Type = PacketType.SCOREPACKET;
-            m_index = index;
+            m_lobbyNumber = lobbyNumber;
+            m_playerNumber = playerNumber;
         }
 
-		public ScorePacket(int playerOne, int playerTwo)
+		public ScorePacket(int lobbyNumber, int playerOne, int playerTwo)
 		{
 			Type = PacketType.SCOREPACKET;
+            m_lobbyNumber = lobbyNumber;
 			m_playerOneScore = playerOne;
 			m_playerTwoScore = playerTwo;
 		}
@@ -224,6 +255,12 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		[JsonPropertyName("Winner")]
 		public int m_winnerState { get; set; }
 
+        [JsonPropertyName("LobbyNumber")]
+        public int m_lobbyNumber { get; set; }
+
+        [JsonPropertyName("PlayerNumber")]
+        public int m_playerNumber;
+
 
         public GameStatePacket()
         {
@@ -232,16 +269,18 @@ namespace Multiplayer_Games_Programming_Packet_Library
             m_gameState = int.MaxValue;
         }
 
-        public GameStatePacket(int index, int gameState)
+        public GameStatePacket(int lobbyNumber, int playerNumber, int gameState)
         {
             Type = PacketType.GAMESTATEPACKET;
             m_gameState = gameState;
-            m_index = index;
+            m_lobbyNumber = lobbyNumber;
+            m_playerNumber = playerNumber;
         }
-        public GameStatePacket(int index, int gameState, int winnerState)
+        public GameStatePacket(int lobbyNumber, int playerNumber, int gameState, int winnerState)
         {
             Type = PacketType.GAMESTATEPACKET;
-            m_index = index;
+            m_lobbyNumber = lobbyNumber;
+            m_playerNumber = playerNumber;
             m_gameState = gameState;
 			m_winnerState = winnerState;
         }
@@ -250,6 +289,12 @@ namespace Multiplayer_Games_Programming_Packet_Library
     [Serializable]
     public class TimerPacket : Packet
     {
+        [JsonPropertyName("LobbyNumber")]
+        public int m_lobbyNumber { get; set; }
+
+        [JsonPropertyName("PlayerNumber")]
+        public int m_playerNumber;
+
         [JsonPropertyName("GameTimer")]
         public float m_gameTimer;
 
@@ -263,9 +308,10 @@ namespace Multiplayer_Games_Programming_Packet_Library
             m_restartTimer = float.MaxValue;           
         }
 
-        public TimerPacket(float gameTimer, float restarttimer)
+        public TimerPacket(int lobbyNumber, float gameTimer, float restarttimer)
         {
             Type = PacketType.TIMERPACKET;
+            m_lobbyNumber = lobbyNumber;
             m_gameTimer = gameTimer;
             m_restartTimer = restarttimer; 
         }       
@@ -274,11 +320,11 @@ namespace Multiplayer_Games_Programming_Packet_Library
     [Serializable]
     public class LobbyPacket : Packet
     {
-        [JsonPropertyName("LobbyNumber")]
-        public int m_lobbyNumber { get; set; }
-
         [JsonPropertyName("LobbyReady")]
         public bool m_lobbyReady { get; set;}
+
+        [JsonPropertyName("LobbyNumber")]
+        public int m_lobbyNumber { get; set; }
 
         [JsonPropertyName("PlayerNumber")]
         public int m_playerNumber;
@@ -344,17 +390,27 @@ namespace Multiplayer_Games_Programming_Packet_Library
         [JsonPropertyName("LobbyNumber")]
         public int m_lobbyNumber { get; set; }
 
+        [JsonPropertyName("index")]
+        public int m_index { get; set; }
+
         public GameStartPacket()
         {
             Type = PacketType.GAMESTARTPACKET;
             m_startGame = false;
             m_lobbyNumber = int.MaxValue;
         }
-        public GameStartPacket(bool startGame, int lobbyNumber)
+
+        public GameStartPacket(bool startGame)
+        {
+            Type = PacketType.GAMESTARTPACKET;
+            m_startGame = true;            
+        }
+
+        public GameStartPacket(bool startGame, int index)
         {
             Type = PacketType.GAMESTARTPACKET;
             m_startGame = true;
-            m_lobbyNumber = m_lobbyNumber;
+            m_index = index;
         }
     }
 

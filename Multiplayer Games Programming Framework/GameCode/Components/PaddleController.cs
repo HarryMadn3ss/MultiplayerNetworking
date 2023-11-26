@@ -35,8 +35,8 @@ namespace Multiplayer_Games_Programming_Framework
 
 			m_Rigidbody.m_Body.LinearVelocity = (m_Transform.Up * input.Y * m_Speed);
 
-			PositionPacket packet = new PositionPacket(m_index, this.m_Transform.Position.X, this.m_Transform.Position.Y);
-			NetworkManager.m_Instance.TCPSendMessage(packet, false);
+			PositionPacket packet = new PositionPacket(NetworkManager.m_Instance.m_lobbyNumber, NetworkManager.m_Instance.m_playerNumber, this.m_Transform.Position.X, this.m_Transform.Position.Y);
+			NetworkManager.m_Instance.TCPSendMessage(packet);
 
 			//Debug.WriteLine($"Pos of Player: {packet.Index} {packet.X} {packet.Y}");			
 		}

@@ -70,6 +70,13 @@ namespace Multiplayer_Games_Programming_Server
             m_StreamWriter.Flush();
         }
 
+        public void SendUDP(Packet packet, UdpClient listener)
+        {
+            string packetToSend = packet.Serialize();
+            byte[] bytes = Encoding.UTF8.GetBytes(packetToSend);
+            listener.SendAsync(bytes, bytes.Length, _UDPAddress.RemoteEndPoint);
+        }
+
 
         public void Login(int index)
         {

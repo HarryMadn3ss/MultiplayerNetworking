@@ -88,8 +88,8 @@ namespace Multiplayer_Games_Programming_Framework
 				PlayButton.Click += (s, a) =>
 				{
 					//m_Manager.LoadScene(new GameScene(m_Manager));
-					GameStartPacket gameStartPacket = new GameStartPacket(true, NetworkManager.m_Instance.m_lobbyNumber);
-					NetworkManager.m_Instance.TCPSendMessage(gameStartPacket);
+					GameStartPacket gameStartPacket = new GameStartPacket(true, NetworkManager.m_Instance.m_index);
+					NetworkManager.m_Instance.TCPSendMessage(gameStartPacket, false);
 				};
 				
 				
@@ -113,22 +113,7 @@ namespace Multiplayer_Games_Programming_Framework
                 waitForHostTxt.Height = (Constants.m_ScreenHeight / rows) * waitTxt.GridRowSpan;
                 waitForHostTxt.Background = null;
                 grid.Widgets.Add(waitForHostTxt);
-            }
-
-			if(NetworkManager.m_Instance.m_gameStart)
-			{
-                var CountdownTxt = new TextBox();
-                CountdownTxt.Text = "Game Starting: " + m_timer;
-                CountdownTxt.GridRow = 2;
-                CountdownTxt.GridColumn = 1;
-                CountdownTxt.GridColumnSpan = 2;
-                CountdownTxt.HorizontalAlignment = HorizontalAlignment.Center;
-                CountdownTxt.VerticalAlignment = VerticalAlignment.Center;
-                CountdownTxt.Width = (Constants.m_ScreenWidth / cols) * waitTxt.GridColumnSpan;
-                CountdownTxt.Height = (Constants.m_ScreenHeight / rows) * waitTxt.GridRowSpan;
-                CountdownTxt.Background = null;
-                grid.Widgets.Add(CountdownTxt);
-            }
+            }		
 
             
             if (NetworkManager.m_Instance.m_lobbyReady)
@@ -160,27 +145,10 @@ namespace Multiplayer_Games_Programming_Framework
 				LoadContent();
 				m_safeGuard = true;
 			}
-			if(NetworkManager.m_Instance.m_gameStart)
+			if (NetworkManager.m_Instance.m_gameStart)
 			{
-				if(m_timer < 0)
-				{
-					m_Manager.LoadScene(new GameScene(m_Manager));
-				}
-				else
-				{
-					if(NetworkManager.m_Instance.m_playerNumber == 1)
-					{						
-						m_timer -= deltaTime;
-						GameCountdownPacket countdownPacket = new GameCountdownPacket(NetworkManager.m_Instance.m_lobbyNumber, m_timer);
-						NetworkManager.m_Instance.TCPSendMessage(countdownPacket);
-					}
-					else
-					{
-                        m_timer = NetworkManager.m_Instance.m_countDown;
-                    }					
-                    LoadContent();
-                }
-            }			
+				m_Manager.LoadScene(new GameScene(m_Manager));
+			}						
         }
 
 

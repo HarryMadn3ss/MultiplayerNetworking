@@ -16,8 +16,12 @@ namespace Multiplayer_Games_Programming_Server
 		{
 			public ConnectedClient playerOne;
 			public ConnectedClient playerTwo;
-			public bool full;		
-		};
+			public bool full;
+
+            //score
+            public int playerOneScore;
+            public int playerTwoScore;
+        };
 
 		GameLobby[] m_gameLobbies = new GameLobby[2];
 
@@ -26,9 +30,7 @@ namespace Multiplayer_Games_Programming_Server
 		TcpListener m_TcpListener; //listens for tcp connections on certain ip addresses
 		UdpClient m_UdpListener; //listen for udp responses
 
-		//score
-		int playerOneScore = 0;
-		int playerTwoScore = 0;
+		
 
 		ConcurrentDictionary<int, ConnectedClient> m_Clients;
 
@@ -127,21 +129,21 @@ namespace Multiplayer_Games_Programming_Server
                     case PacketType.POSITIONPACKET:
                         PositionPacket pp = (PositionPacket)packet;
 						//Console.WriteLine($"postision: Index: {pp.Index} X:{pp.X} Y:{pp.Y}");
-						if (index == 0)
+						if (pp.m_playerNumber == 1)
 						{
-							ConnectedClient? receiver;
-							if (m_Clients.TryGetValue(index + 1, out receiver))
-							{
-								receiver.Send(index, new PositionPacket(pp.Index, pp.X, pp.Y));
-							}
+							//ConnectedClient? receiver;
+							//if (m_Clients.TryGetValue(index + 1, out receiver))
+							//{
+							m_gameLobbies[pp.m_lobbyNumber].playerTwo.Send(index, pp);
+							//}
 						}
 						else
 						{
-                            ConnectedClient? receiver;
-                            if (m_Clients.TryGetValue((index - 1), out receiver))
-                            {
-                                receiver.Send(index, new PositionPacket(pp.Index, pp.X, pp.Y));
-                            }
+                            //ConnectedClient? receiver;
+                            //if (m_Clients.TryGetValue((index - 1), out receiver))
+                            //{
+                            m_gameLobbies[pp.m_lobbyNumber].playerOne.Send(index, pp);
+                            //}
                         }
                         break;
                     case PacketType.LOGINPACKET:
@@ -153,53 +155,60 @@ namespace Multiplayer_Games_Programming_Server
 
                     case PacketType.BALLPACKET:
                         BallPacket bp = (BallPacket)packet;
-                        if (index == 0)
-                        {
-                            ConnectedClient? receiver;
-                            if (m_Clients.TryGetValue(index + 1, out receiver))
-                            {
-                                receiver.Send(index, new BallPacket(bp.X, bp.Y));
-                            }
-                        }
-                        else
-                        {
-                            ConnectedClient? receiver;
-                            if (m_Clients.TryGetValue((index - 1), out receiver))
-                            {
-                                m_Clients[index - 1].Send(index, new BallPacket(bp.X, bp.Y));
-                            }
 
-                        }
+						if(bp.m_playerNumber == 1)
+						{
+							m_gameLobbies[bp.m_lobbyNumber].playerTwo.Send(index, bp);
+						}
+                        //if (index == 0)
+                        //{
+                        //    ConnectedClient? receiver;
+                        //    if (m_Clients.TryGetValue(index + 1, out receiver))
+                        //    {
+                        //        receiver.Send(index, new BallPacket(bp.X, bp.Y));
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    ConnectedClient? receiver;
+                        //    if (m_Clients.TryGetValue((index - 1), out receiver))
+                        //    {
+                        //        m_Clients[index - 1].Send(index, new BallPacket(bp.X, bp.Y));
+                        //    }
+                        //}
                         break;
                     case PacketType.SCOREPACKET:
                         ScorePacket sp = (ScorePacket)packet;
 						lock(sp)
 						{
-							if (sp.m_index == 1)
+							if (sp.m_playerNumber == 2)
 							{
-							    playerOneScore++;
+							    m_gameLobbies[sp.m_lobbyNumber].playerOneScore++;
 							}
-							else if (sp.m_index == 0)
+							else if (sp.m_playerNumber == 1)
 							{
-							    playerTwoScore++;
+                                m_gameLobbies[sp.m_lobbyNumber].playerTwoScore++;
 							}
-							m_Clients[index].Send(index, new ScorePacket(playerOneScore, playerTwoScore));
-							ConnectedClient? receiverClient;
-							if (m_Clients.TryGetValue(index + 1, out receiverClient))
-							{
-							    receiverClient.Send(index, new ScorePacket(playerOneScore, playerTwoScore));
-							}
+							m_gameLobbies[sp.m_lobbyNumber].playerOne.Send(index, new ScorePacket(sp.m_lobbyNumber, m_gameLobbies[sp.m_lobbyNumber].playerOneScore, m_gameLobbies[sp.m_lobbyNumber].playerTwoScore));
+							m_gameLobbies[sp.m_lobbyNumber].playerTwo.Send(index, new ScorePacket(sp.m_lobbyNumber, m_gameLobbies[sp.m_lobbyNumber].playerOneScore, m_gameLobbies[sp.m_lobbyNumber].playerTwoScore));
+							//m_Clients[index].Send(index, new ScorePacket(playerOneScore, playerTwoScore));
+							//ConnectedClient? receiverClient;
+							//if (m_Clients.TryGetValue(index + 1, out receiverClient))
+							//{
+							//    receiverClient.Send(index, new ScorePacket(playerOneScore, playerTwoScore));
+							//}
 						}                       
                         break;
 					case PacketType.TIMERPACKET:
 						TimerPacket tp = (TimerPacket)packet;
-						{
-                            ConnectedClient? timerReceiver;
-                            if (m_Clients.TryGetValue((index + 1), out timerReceiver))
-							{
-								timerReceiver?.Send(index, new TimerPacket(tp.m_gameTimer, tp.m_restartTimer));
-							}
-						}						
+
+						m_gameLobbies[tp.m_lobbyNumber].playerTwo.Send(index, tp);
+       //                     ConnectedClient? timerReceiver;
+       //                     if (m_Clients.TryGetValue((index + 1), out timerReceiver))
+							//{
+							//	timerReceiver?.Send(index, new TimerPacket(tp.m_gameTimer, tp.m_restartTimer));
+							//}
+												
 						break;
 
 					case PacketType.SERVERSTATUSPACKET:
@@ -215,11 +224,14 @@ namespace Multiplayer_Games_Programming_Server
 
 					case PacketType.GAMESTARTPACKET:
 						GameStartPacket gsp = (GameStartPacket)packet;
-						if(gsp.m_startGame)
-						{                            
-                            m_gameLobbies[gsp.m_lobbyNumber].playerOne.Send(index, gsp);
-                            m_gameLobbies[gsp.m_lobbyNumber].playerTwo.Send(index, gsp);
-                        }
+						lock(gsp)
+						{
+                            if (gsp.m_startGame)
+                            {
+                                m_gameLobbies[m_Clients[gsp.m_index].m_lobbyNumber].playerOne.Send(index, new GameStartPacket(true));
+                                m_gameLobbies[m_Clients[gsp.m_index].m_lobbyNumber].playerTwo.Send(index, new GameStartPacket(true));
+                            }
+                        }						
 						break;
 
                     case PacketType.GAMECOUNTDOWN:
@@ -273,18 +285,20 @@ namespace Multiplayer_Games_Programming_Server
                         break;
 					case PacketType.GAMESTATEPACKET:
 						GameStatePacket gsp = (GameStatePacket)packetToRead;
-						GameStatePacket SendGameStatePacket = new GameStatePacket(gsp.m_index, gsp.m_gameState, gsp.m_winnerState);
+						GameStatePacket SendGameStatePacket = new GameStatePacket(gsp.m_lobbyNumber, gsp.m_playerNumber, gsp.m_gameState, gsp.m_winnerState);
 						if(gsp.m_gameState == 0)
 						{
-							playerOneScore = 0;
-							playerTwoScore = 0;
+                            m_gameLobbies[gsp.m_lobbyNumber].playerOneScore = 0;
+                            m_gameLobbies[gsp.m_lobbyNumber].playerTwoScore = 0;
 						}
 
-						ConnectedClient receiverClient;
-						if (m_Clients.TryGetValue(gsp.m_index + 1, out receiverClient))
-						{
-							SendUDP(SendGameStatePacket, receiverClient.GetUDPAddress());
-						}
+						m_gameLobbies[gsp.m_lobbyNumber].playerTwo.SendUDP(SendGameStatePacket, m_UdpListener);
+
+						//ConnectedClient receiverClient;
+						//if (m_Clients.TryGetValue(gsp.m_index + 1, out receiverClient))
+						//{
+						//	SendUDP(SendGameStatePacket, receiverClient.GetUDPAddress());
+						//}
                             break;
 					default:
                         break;

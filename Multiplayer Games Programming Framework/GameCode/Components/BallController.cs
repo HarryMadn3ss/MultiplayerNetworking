@@ -51,10 +51,10 @@ namespace Multiplayer_Games_Programming_Framework
 				UpdatePosition(NetworkManager.m_Instance.m_ballPositionUpdate);
             }
 
-			if(NetworkManager.m_Instance.m_index == 0)
+			if(NetworkManager.m_Instance.m_playerNumber == 1)
 			{
-				BallPacket packet = new BallPacket(this.m_Transform.Position.X, this.m_Transform.Position.Y);
-				NetworkManager.m_Instance.TCPSendMessage(packet, false);
+				BallPacket packet = new BallPacket(NetworkManager.m_Instance.m_lobbyNumber, NetworkManager.m_Instance.m_playerNumber, this.m_Transform.Position.X, this.m_Transform.Position.Y);
+				NetworkManager.m_Instance.TCPSendMessage(packet);
 			}
 
             base.Update(deltaTime);

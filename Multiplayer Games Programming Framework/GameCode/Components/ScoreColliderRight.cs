@@ -21,9 +21,9 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components
 
         protected override void OnCollisionEnter(Fixture sender, Fixture other, Contact contact)
         {
-            if (NetworkManager.m_Instance.m_index == 0)
+            if (NetworkManager.m_Instance.m_playerNumber == 1)
             {
-                ScorePacket _scorePacket = new ScorePacket(1);
+                ScorePacket _scorePacket = new ScorePacket(NetworkManager.m_Instance.m_lobbyNumber, NetworkManager.m_Instance.m_playerNumber + 1);
                 NetworkManager.m_Instance.TCPSendMessage(_scorePacket);
             }
         }
