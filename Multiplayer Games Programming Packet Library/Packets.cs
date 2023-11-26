@@ -87,7 +87,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public int m_lobbyNumber { get; set; }
 
         [JsonPropertyName("PlayerNumber")]
-        public int m_playerNumber;
+        public int m_playerNumber { get; set; }
 
         public PositionPacket()
 		{
@@ -156,7 +156,9 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public int m_lobbyNumber { get; set; }
 
         [JsonPropertyName("PlayerNumber")]
-        public int m_playerNumber;
+        public int m_playerNumber { get; set; }
+
+        
 
         public BallPacket()
         {
@@ -176,6 +178,8 @@ namespace Multiplayer_Games_Programming_Packet_Library
             Y = y;
         }
 
+        
+
     }
     [Serializable]
     public class ScorePacket : Packet
@@ -193,7 +197,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public int m_lobbyNumber { get; set; }
 
         [JsonPropertyName("PlayerNumber")]
-        public int m_playerNumber;
+        public int m_playerNumber { get; set; }
 
         public ScorePacket()
         {
@@ -259,7 +263,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public int m_lobbyNumber { get; set; }
 
         [JsonPropertyName("PlayerNumber")]
-        public int m_playerNumber;
+        public int m_playerNumber { get; set; }
 
 
         public GameStatePacket()
@@ -293,13 +297,13 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public int m_lobbyNumber { get; set; }
 
         [JsonPropertyName("PlayerNumber")]
-        public int m_playerNumber;
+        public int m_playerNumber { get; set; }
 
         [JsonPropertyName("GameTimer")]
-        public float m_gameTimer;
+        public float m_gameTimer { get; set; }
 
         [JsonPropertyName("RestartTimer")]
-        public float m_restartTimer;        
+        public float m_restartTimer { get; set; }
 
         public TimerPacket()
         {
@@ -327,7 +331,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public int m_lobbyNumber { get; set; }
 
         [JsonPropertyName("PlayerNumber")]
-        public int m_playerNumber;
+        public int m_playerNumber { get; set; }
 
         public LobbyPacket()
         {
@@ -355,7 +359,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
     public class ServerStatusPacket : Packet
     {
         [JsonPropertyName("ServerNumber")]
-        public int m_serverNumber;
+        public int m_serverNumber { get; set; }
 
         [JsonPropertyName("Status")]
         public bool m_online { get; set; }

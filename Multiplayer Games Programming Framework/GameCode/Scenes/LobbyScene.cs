@@ -68,7 +68,8 @@ namespace Multiplayer_Games_Programming_Framework
             waitTxt.Width = (Constants.m_ScreenWidth / cols) * waitTxt.GridColumnSpan;
             waitTxt.Height = (Constants.m_ScreenHeight / rows) * waitTxt.GridRowSpan;
 			waitTxt.Background = null;
-			grid.Widgets.Add(waitTxt);
+            waitTxt.AcceptsKeyboardFocus = false;
+            grid.Widgets.Add(waitTxt);
 
 			if (NetworkManager.m_Instance.m_playerNumber == 1)
 			{
@@ -112,6 +113,7 @@ namespace Multiplayer_Games_Programming_Framework
                 waitForHostTxt.Width = (Constants.m_ScreenWidth / cols) * waitTxt.GridColumnSpan;
                 waitForHostTxt.Height = (Constants.m_ScreenHeight / rows) * waitTxt.GridRowSpan;
                 waitForHostTxt.Background = null;
+				waitForHostTxt.AcceptsKeyboardFocus = false;
                 grid.Widgets.Add(waitForHostTxt);
             }		
 
